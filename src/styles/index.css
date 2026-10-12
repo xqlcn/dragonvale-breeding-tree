@@ -1,0 +1,17 @@
+/*
+ * Global stylesheet entry. Files are imported in the same order the rules had in the
+ * original single-file page, because several rules rely on source order to break
+ * specificity ties (e.g. img.flag-sm vs .card-head img, .gnode.owned vs .gnode.nomarket).
+ * Keep new rules in the file for their feature; add new files at the end of the list.
+ */
+@import "./01-tokens.css";
+@import "./02-base.css";
+@import "./03-toolbar.css";
+@import "./04-stats-legend.css";
+@import "./05-cards.css";
+@import "./06-tree.css";
+@import "./07-shared-table.css";
+@import "./08-tabs.css";
+@import "./09-graph.css";
+@import "./10-obtained.css";
+@import "./11-print.css";

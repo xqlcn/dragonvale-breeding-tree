@@ -1,0 +1,7 @@
+/* Design tokens: palette + element colors. */
+:root{
+  --bg:#14101c; --panel:#1f1830; --panel2:#281f3d; --line:#3d3158; --text:#efe9f7; --muted:#a99cc0;
+  --accent:#ff8a2b; --accent2:#b678ff; --good:#7ee0a1; --warn:#ffcf5c; --none:#6f6585;
+  --plant:#5cb85c; --fire:#ff5a36; --earth:#b07a3c; --cold:#7fd3ff; --lightning:#ffd23f;
+  --water:#3f8cff; --air:#bfe8e0; --metal:#a3acb8; --light:#fff3a8; --dark:#8a5cc7; --epic:#ff6fd8;
+}

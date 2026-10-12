@@ -1,0 +1,7 @@
+/* Print layout. */
+@media print{
+  body{background:#fff;color:#000}
+  .bar{display:none}
+  .card{break-inside:avoid;border-color:#ccc;background:#fff}
+  .card-head{background:#f6f2fb}
+}

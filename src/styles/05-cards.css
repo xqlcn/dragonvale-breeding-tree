@@ -1,0 +1,20 @@
+/* Dragon cards: header, price, formula, tags. */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card-head{display:flex;gap:14px;align-items:center;padding:14px;background:linear-gradient(135deg,var(--panel2),var(--panel))}
+.card-head img{width:88px;height:88px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.card-head h2{margin:0;font-size:21px}
+.price{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--warn);white-space:nowrap}
+.price.none{color:var(--none);font-weight:500}
+img.candy{width:auto!important;height:15px!important;margin:0 3px 0 0!important;vertical-align:-2px;object-fit:contain;filter:none!important}
+.formula{margin-top:6px;color:var(--muted);font-size:13px;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.formula strong{color:var(--text)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:rgba(0,0,0,.2)}
+.tag.night{color:#c9b6ff;border-color:#5d4a8f}
+.tag.rift{color:#7fe7ff;border-color:#2e6c80}
+.tag.evolve{color:var(--good);border-color:#2f6b47}
+.tag.clone{color:var(--warn);border-color:#7a6125}
+.tag.subtotal{color:var(--accent);border-color:#7a4a25}
+.tree-wrap{padding:6px 12px 14px;border-top:1px solid var(--line);flex:1}
+.tree-wrap > .lbl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:8px 0 4px}

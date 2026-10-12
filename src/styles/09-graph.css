@@ -1,0 +1,40 @@
+/* Breeding graph: toolbar, legend, viewport, nodes and edges. */
+.gbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 0}
+.gbar label{color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gbar select,.gbar button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
+.gbar button:hover{border-color:var(--accent)}
+.gbar .spacer{flex:1}
+.glegend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:12px;margin-bottom:10px;align-items:center}
+.glegend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:16px;height:12px;border-radius:3px;border:2px solid;background:var(--panel)}
+.sw.target{border-color:var(--accent)} .sw.market{border-color:var(--accent2)} .sw.nomarket{border-color:var(--none);border-style:dashed}
+#gview{position:relative;height:max(480px,calc(100vh - 230px));border:1px solid var(--line);border-radius:12px;overflow:hidden;background-color:#181226;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px;touch-action:none;cursor:grab}
+#gview.dragging{cursor:grabbing}
+#gsvg{width:100%;height:100%;display:block}
+#gstatus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);pointer-events:none}
+.gnode{cursor:pointer;transition:opacity .15s}
+.gnode rect.box{fill:var(--panel);stroke:var(--accent2);stroke-width:2}
+.gnode.target rect.box{stroke:var(--accent);fill:#2a1d2e}
+.gnode.nomarket rect.box{stroke:var(--none);stroke-dasharray:6 4}
+.gnode:hover rect.box{filter:brightness(1.25)}
+.gnode.sel rect.box{stroke-width:4}
+.gnode text{fill:var(--text);font:600 14px system-ui,-apple-system,"Segoe UI",sans-serif}
+.gnode text.pr{fill:var(--warn);font-size:13px;font-weight:700}
+.gnode.nomarket text.pr{fill:var(--none);font-weight:500;font-size:12px}
+.gnode text.fl{fill:var(--muted);font-size:12px;font-weight:500}
+.gedge{fill:none;stroke:#8b7fa6;stroke-width:1.6;transition:opacity .15s}
+.gedge.evolve{stroke:var(--good);stroke-dasharray:6 4}
+.dim{opacity:.12}
+.gedge.hl{stroke:var(--accent);stroke-width:2.6}
+.gedge.hl2{stroke:var(--cold);stroke-width:2.6;stroke-dasharray:none}
+.gnode.down rect.box{stroke:var(--cold);stroke-width:3;stroke-dasharray:none}
+#ginfo{color:var(--muted);font-size:13px;min-height:1.4em;margin:-4px 0 8px}
+.gedge.evolve.hl{stroke:var(--good)}
+.gnode.owned rect.box{stroke:var(--good);fill:#17291f;stroke-dasharray:none}
+.gown{cursor:pointer}
+.gown circle{fill:var(--panel);stroke:#57497a;stroke-width:2}
+.gown text{fill:transparent;font:800 12px system-ui,sans-serif}
+.gown:hover circle{stroke:var(--good)}
+.gown:hover text{fill:var(--good)}
+.gown[aria-pressed="true"] circle{fill:var(--good);stroke:var(--good)}
+.gown[aria-pressed="true"] text{fill:#0d2416}

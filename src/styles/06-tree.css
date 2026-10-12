@@ -1,0 +1,22 @@
+/* Breeding trees (nested <details>) and dragon/element nodes. */
+ul.tree,ul.tree ul{list-style:none;margin:0;padding:0}
+ul.tree ul{margin-left:18px;padding-left:12px;border-left:1px dashed var(--line)}
+ul.tree li{position:relative;margin:4px 0}
+ul.tree ul > li::before{content:"";position:absolute;left:-12px;top:22px;width:10px;border-top:1px dashed var(--line)}
+details > summary{list-style:none;cursor:pointer}
+details > summary::-webkit-details-marker{display:none}
+.node{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid transparent}
+summary .node:hover{border-color:var(--line)}
+.node img{width:38px;height:38px;object-fit:contain;flex:none}
+.node .nm{font-weight:600}
+.node .meta{display:flex;flex-direction:column;min-width:0}
+.node .how{font-size:12px;color:var(--muted)}
+.node .right{margin-left:auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.caret{width:14px;flex:none;color:var(--muted);font-size:11px;transition:transform .15s}
+details[open] > summary .caret{transform:rotate(90deg)}
+.leafpad{width:14px;flex:none}
+.el{display:inline-flex;align-items:center;gap:4px;padding:1px 8px 1px 3px;border-radius:99px;font-size:12px;font-weight:600;color:#111;white-space:nowrap}
+.node.elnode{background:none;padding:2px 4px}
+.node.elnode img.flag{width:30px;height:30px;object-fit:contain}
+img.flag-sm{width:22px;height:22px;object-fit:contain;vertical-align:middle}
+.badge-night{font-size:11px;color:#c9b6ff}

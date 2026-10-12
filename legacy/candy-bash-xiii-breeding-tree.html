@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Candy Bash Breeding Tree</title>
+<style>
+:root{
+  --bg:#14101c; --panel:#1f1830; --panel2:#281f3d; --line:#3d3158; --text:#efe9f7; --muted:#a99cc0;
+  --accent:#ff8a2b; --accent2:#b678ff; --good:#7ee0a1; --warn:#ffcf5c; --none:#6f6585;
+  --plant:#5cb85c; --fire:#ff5a36; --earth:#b07a3c; --cold:#7fd3ff; --lightning:#ffd23f;
+  --water:#3f8cff; --air:#bfe8e0; --metal:#a3acb8; --light:#fff3a8; --dark:#8a5cc7; --epic:#ff6fd8;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{background-image:radial-gradient(circle at 20% -10%,#3a1f55 0,transparent 45%),radial-gradient(circle at 100% 0,#4a2410 0,transparent 35%)}
+header{padding:28px 16px 8px;max-width:1280px;margin:0 auto}
+h1{margin:0;font-size:clamp(24px,4vw,36px);letter-spacing:.5px}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:6px 0 0}
+main{max-width:1280px;margin:0 auto;padding:0 16px 48px}
+.bar{position:sticky;top:0;z-index:5;background:rgba(20,16,28,.92);backdrop-filter:blur(6px);display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:16px}
+.bar input,.bar select,.bar button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+.bar input{flex:1 1 200px;min-width:0}
+.bar button{cursor:pointer}
+.bar button:hover{border-color:var(--accent)}
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 6px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stat b{display:block;font-size:20px;color:var(--accent)}
+.stat small{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;color:var(--muted);font-size:13px;margin:8px 0 4px}
+.legend .el{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card-head{display:flex;gap:14px;align-items:center;padding:14px;background:linear-gradient(135deg,var(--panel2),var(--panel))}
+.card-head img{width:88px;height:88px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.5))}
+.card-head h2{margin:0;font-size:21px}
+.price{display:inline-flex;align-items:center;gap:4px;font-weight:700;color:var(--warn);white-space:nowrap}
+.price.none{color:var(--none);font-weight:500}
+img.candy{width:auto!important;height:15px!important;margin:0 3px 0 0!important;vertical-align:-2px;object-fit:contain;filter:none!important}
+.formula{margin-top:6px;color:var(--muted);font-size:13px}
+.formula strong{color:var(--text)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:rgba(0,0,0,.2)}
+.tag.night{color:#c9b6ff;border-color:#5d4a8f}
+.tag.rift{color:#7fe7ff;border-color:#2e6c80}
+.tag.evolve{color:var(--good);border-color:#2f6b47}
+.tag.clone{color:var(--warn);border-color:#7a6125}
+.tag.subtotal{color:var(--accent);border-color:#7a4a25}
+.tree-wrap{padding:6px 12px 14px;border-top:1px solid var(--line);flex:1}
+.tree-wrap > .lbl{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:8px 0 4px}
+ul.tree,ul.tree ul{list-style:none;margin:0;padding:0}
+ul.tree ul{margin-left:18px;padding-left:12px;border-left:1px dashed var(--line)}
+ul.tree li{position:relative;margin:4px 0}
+ul.tree ul > li::before{content:"";position:absolute;left:-12px;top:22px;width:10px;border-top:1px dashed var(--line)}
+details > summary{list-style:none;cursor:pointer}
+details > summary::-webkit-details-marker{display:none}
+.node{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border-radius:9px;background:rgba(255,255,255,.03);border:1px solid transparent}
+summary .node:hover{border-color:var(--line)}
+.node img{width:38px;height:38px;object-fit:contain;flex:none}
+.node .nm{font-weight:600}
+.node .meta{display:flex;flex-direction:column;min-width:0}
+.node .how{font-size:12px;color:var(--muted)}
+.node .right{margin-left:auto;text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.caret{width:14px;flex:none;color:var(--muted);font-size:11px;transition:transform .15s}
+details[open] > summary .caret{transform:rotate(90deg)}
+.leafpad{width:14px;flex:none}
+.el{display:inline-flex;align-items:center;gap:4px;padding:1px 8px 1px 3px;border-radius:99px;font-size:12px;font-weight:600;color:#111;white-space:nowrap}
+.node.elnode{background:none;padding:2px 4px}
+.node.elnode img.flag{width:30px;height:30px;object-fit:contain}
+img.flag-sm{width:22px;height:22px;object-fit:contain;vertical-align:middle}
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.badge-night{font-size:11px;color:#c9b6ff}
+section.extra{margin-top:36px}
+section.extra h3{margin:0 0 10px;font-size:20px}
+.shared{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr));gap:10px}
+.shared .node{background:var(--panel);border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;background:var(--panel);border-radius:12px;overflow:hidden}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:1px;background:var(--panel2)}
+td img{width:34px;height:34px;object-fit:contain;vertical-align:middle;margin-right:6px}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto}
+footer{color:var(--muted);font-size:12px;max-width:1280px;margin:0 auto;padding:0 16px 30px}
+.empty{color:var(--muted);padding:30px;text-align:center}
+
+.hint{color:var(--muted);font-size:13px;margin:4px 0 0}
+.tabs{display:flex;gap:6px;margin:16px 0 4px;border-bottom:1px solid var(--line)}
+.tabs button{background:none;border:1px solid transparent;border-bottom:none;color:var(--muted);font:inherit;font-weight:600;padding:10px 16px;border-radius:10px 10px 0 0;cursor:pointer;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{background:var(--panel);color:var(--text);border-color:var(--line);border-bottom:1px solid var(--panel)}
+.gbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 0}
+.gbar label{color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gbar select,.gbar button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
+.gbar button:hover{border-color:var(--accent)}
+.gbar .spacer{flex:1}
+.glegend{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:12px;margin-bottom:10px;align-items:center}
+.glegend span{display:inline-flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:16px;height:12px;border-radius:3px;border:2px solid;background:var(--panel)}
+.sw.target{border-color:var(--accent)} .sw.market{border-color:var(--accent2)} .sw.nomarket{border-color:var(--none);border-style:dashed}
+#gview{position:relative;height:max(480px,calc(100vh - 230px));border:1px solid var(--line);border-radius:12px;overflow:hidden;background-color:#181226;background-image:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1px);background-size:22px 22px;touch-action:none;cursor:grab}
+#gview.dragging{cursor:grabbing}
+#gsvg{width:100%;height:100%;display:block}
+#gstatus{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);pointer-events:none}
+.gnode{cursor:pointer;transition:opacity .15s}
+.gnode rect.box{fill:var(--panel);stroke:var(--accent2);stroke-width:2}
+.gnode.target rect.box{stroke:var(--accent);fill:#2a1d2e}
+.gnode.nomarket rect.box{stroke:var(--none);stroke-dasharray:6 4}
+.gnode:hover rect.box{filter:brightness(1.25)}
+.gnode.sel rect.box{stroke-width:4}
+.gnode text{fill:var(--text);font:600 14px system-ui,-apple-system,"Segoe UI",sans-serif}
+.gnode text.pr{fill:var(--warn);font-size:13px;font-weight:700}
+.gnode.nomarket text.pr{fill:var(--none);font-weight:500;font-size:12px}
+.gnode text.fl{fill:var(--muted);font-size:12px;font-weight:500}
+.gedge{fill:none;stroke:#8b7fa6;stroke-width:1.6;transition:opacity .15s}
+.gedge.evolve{stroke:var(--good);stroke-dasharray:6 4}
+.dim{opacity:.12}
+.gedge.hl{stroke:var(--accent);stroke-width:2.6}
+.gedge.hl2{stroke:var(--cold);stroke-width:2.6;stroke-dasharray:none}
+.gnode.down rect.box{stroke:var(--cold);stroke-width:3;stroke-dasharray:none}
+#ginfo{color:var(--muted);font-size:13px;min-height:1.4em;margin:-4px 0 8px}
+.gedge.evolve.hl{stroke:var(--good)}
+
+button.own{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #57497a;background:transparent;color:transparent;font:800 13px/1 system-ui,sans-serif;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+button.own:hover{border-color:var(--good);color:var(--good)}
+button.own[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#0d2416}
+button.own.big{width:auto;height:auto;border-radius:99px;padding:5px 12px;gap:6px;color:var(--muted);font-size:12px;margin-top:8px}
+button.own.big::after{content:"Mark obtained"}
+button.own.big[aria-pressed="true"]{color:#0d2416}
+button.own.big[aria-pressed="true"]::after{content:"Obtained"}
+.card.owned{border-color:var(--good)}
+.card.owned .card-head{background:linear-gradient(135deg,#1d3527,var(--panel))}
+li.owned > .node, li.owned > details > summary > .node{background:rgba(126,224,161,.10);border-color:rgba(126,224,161,.35)}
+.shared .node.owned{border-color:var(--good)}
+#tbl tr.owned td{opacity:.55}
+#tbl tr.owned b{text-decoration:line-through}
+#tbl td.ownc{width:44px}
+.gnode.owned rect.box{stroke:var(--good);fill:#17291f;stroke-dasharray:none}
+.gown{cursor:pointer}
+.gown circle{fill:var(--panel);stroke:#57497a;stroke-width:2}
+.gown text{fill:transparent;font:800 12px system-ui,sans-serif}
+.gown:hover circle{stroke:var(--good)}
+.gown:hover text{fill:var(--good)}
+.gown[aria-pressed="true"] circle{fill:var(--good);stroke:var(--good)}
+.gown[aria-pressed="true"] text{fill:#0d2416}
+@media print{
+  body{background:#fff;color:#000}
+  .bar{display:none}
+  .card{break-inside:avoid;border-color:#ccc;background:#fff}
+  .card-head{background:#f6f2fb}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎃 Candy Bash XIII: <span>FEAR</span> — Breeding Trees</h1>
+  <p class="sub">Full breeding trees for 23 dragons, with Candy (event currency) market prices. Data from the DV Community Forum Candy Bash XIII thread (Oct 8, 2026). Breeding combos can change during the event.</p>
+</header>
+<main>
+  <div class="stats" id="stats"></div>
+  <div class="legend">
+    <span><b style="color:var(--warn)"><img class="candy" src="https://static.wikia.nocookie.net/dragonvale/images/1/1d/Candy_template.png/revision/latest/scale-to-width-down/17?cb=20141009210348" alt="Candy">15,000</b> = event market price</span>
+    <span><b style="color:var(--none)">not in market</b> = must breed / own already</span>
+    <span>Element flags = any dragon with that element, e.g. <img class="flag-sm" src="https://dvboxcdn.com/flags/dark.png" alt="dark"> = any dark dragon</span>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="cards" aria-selected="true">🌳 Trees &amp; prices</button>
+    <button role="tab" data-tab="graph" aria-selected="false">🕸 Breeding graph</button>
+  </nav>
+  <div id="tab-cards">
+  <p class="hint">Click any dragon in a tree to expand / collapse it. Click a <b style="color:var(--good)">✓</b> circle to mark a dragon as obtained. Your progress is saved in this browser.</p>
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search dragons (matches anything in a tree, e.g. Scourge)…">
+    <select id="sort">
+      <option value="list">Your list order</option>
+      <option value="desc">Price: high → low</option>
+      <option value="asc">Price: low → high</option>
+      <option value="az">Name A → Z</option>
+    </select>
+    <select id="ownf">
+      <option value="all">All dragons</option>
+      <option value="need">Still needed</option>
+      <option value="have">Obtained</option>
+    </select>
+    <button id="expand">Expand all</button>
+    <button id="collapse">Collapse all</button>
+    <button id="clearown">Clear obtained</button>
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <section class="extra">
+    <h3>🔁 Shared ingredients</h3>
+    <p class="sub" style="margin:-4px 0 12px">Dragons that show up in the trees of several of your targets. Owning these first saves the most work.</p>
+    <div class="shared" id="shared"></div>
+  </section>
+
+  <section class="extra">
+    <h3>📋 Price summary</h3>
+    <div class="tablewrap"><table id="tbl"></table></div>
+  </section>
+  </div>
+
+  <div id="tab-graph" hidden>
+    <div class="gbar">
+      <label>Highlight a dragon
+        <select id="gfocus"><option value="">— all dragons —</option></select>
+      </label>
+      <span class="spacer"></span>
+      <button id="gzin" title="Zoom in">＋</button>
+      <button id="gzout" title="Zoom out">－</button>
+      <button id="gfit">Fit</button>
+    </div>
+    <div class="glegend">
+      <span><i class="sw target"></i>Your target dragons</span>
+      <span><i class="sw market"></i>In market (ingredient)</span>
+      <span><i class="sw nomarket"></i>Not in market</span>
+      <span><svg width="34" height="10"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--muted)" stroke-width="2"/></svg>breeds into</span>
+      <span><svg width="34" height="10"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--good)" stroke-width="2" stroke-dasharray="5 4"/></svg>evolves into</span>
+      <span><i class="sw" style="border-color:var(--accent)"></i>When highlighting: needed to breed it</span>
+      <span><i class="sw" style="border-color:var(--cold)"></i>When highlighting: uses it</span>
+      <span><i class="sw" style="border-color:var(--good)"></i>Obtained (click the ✓ circle on a box)</span>
+      <span>Flags inside a box = the extra elements its combo needs</span>
+      <span>Drag to pan · scroll / pinch to zoom · click a box to highlight what it needs (orange) and what needs it (blue)</span>
+    </div>
+    <div id="ginfo"></div>
+    <div id="gview"><svg id="gsvg"><defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="context-stroke"/></marker>
+    </defs><g id="gworld"></g></svg>
+      <div id="gstatus">Laying out graph…</div>
+    </div>
+  </div>
+</main>
+<footer>Sprites from dvboxcdn.com. Prices are Candy in the Candy Bash XIII event market. Some notes come from the same forum thread: cloning tips, the odds changes, and that Snowpocalypse is breedable but not sold in the market.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js"></script>
+<script>
+// ---------- DATA ----------
+// recipe items: "Name" = specific dragon, "el:fire" = any dragon with that element, "epic:Treasure" = any dragon with that epic element
+const TARGETS = ["Reaper","Awoo","Yaga","Bruntal","Dracomancy","Kwall","Infernus","Vampir","Fury","Nightmare","Spirit","Wendigo","Nox","Corrupticorn","Umbra","Punk","Kage","Hydnellum","Fortified","Exterrean","Charlatan","Barbarous","Macabre"];
+
+const D = {
+  // --- targets ---
+  Reaper:{price:15000, r:["Macabre","Scourge"]},
+  Awoo:{price:13500, r:["Midnight","Lycan"]},
+  Yaga:{price:15500, r:["Etch","Spirit"], clone:"10%"},
+  Bruntal:{price:16000, r:["Wrath","el:dark"], clone:"10%"},
+  Dracomancy:{price:1000, r:["Bone","Scourge"], sprite:"Dracomancy_1", label:"Dracomancy (1)", note:"Evolves through stages 2–4 as the Ominous Digsite is upgraded"},
+  Kwall:{price:5600, r:["el:plant","el:water","el:light"]},
+  Infernus:{price:7680, r:["el:fire","el:cold","el:water"], clone:"10%"},
+  Vampir:{price:8320, r:["Nosferatu","Zombie"], clone:"10%"},
+  Fury:{price:8560, r:["Misfortune","Snowpocalypse"]},
+  Nightmare:{price:2200, r:["Howl","Abyss"]},
+  Spirit:{price:6080, r:["Ghost","Spectre"]},
+  Wendigo:{price:7000, r:["Macabre","Bone"]},
+  Nox:{price:8760, r:["Antumbra","Voltaic"], rift:true},
+  Corrupticorn:{price:9550, evolve:"Chromacorn", req:"all 10 different Flames of Corruption in your park"},
+  Umbra:{price:9550, evolve:"Scout", req:"all 10 different Tents in your park"},
+  Punk:{price:10000, r:["Decay","Lycan"]},
+  Kage:{price:13680, r:["Eldritch","Wrath"]},
+  Hydnellum:{price:14640, r:["Wendigo","epic:Apocalypse"]},
+  Fortified:{price:17500, r:["Nosferatu","Gatren"], clone:"10%"},
+  Exterrean:{price:18500, r:["Amalgamate","Scourge"], clone:"5%"},
+  Charlatan:{price:8100, r:["Apocalypse","Spirit"], note:"Also buildable from 6 summon parts (500 Candy each)"},
+  Barbarous:{price:9600, r:["Oni","Ragnarok"], note:"Also buildable from 6 summon parts (500 Candy each)"},
+  Macabre:{price:10400, r:["Spectre","Zombie"], note:"Also buildable from 6 summon parts (500 Candy each)"},
+  // --- intermediates in the market ---
+  Scourge:{price:8900, r:["Decay","Misfortune"], note:"Also buildable from 6 summon parts"},
+  Spectre:{price:2150, r:["el:cold","el:earth"]},
+  Zombie:{price:6080, r:["Meteor","Pollen"]},
+  Decay:{price:6080, r:["el:fire","el:earth","el:cold"]},
+  Misfortune:{price:2999, r:["epic:Treasure","epic:Apocalypse"], night:true, note:"Breeding odds raised to 2.5% this event"},
+  Midnight:{price:3750, r:["Moon","el:dark"], night:true},
+  Lycan:{price:6080, r:["el:plant","el:cold","el:lightning"]},
+  Etch:{price:6720, r:["el:dark","el:plant"]},
+  Ghost:{price:1140, r:["el:earth","el:cold"], note:"3% second odds if you already own one"},
+  Bone:{price:760, r:["el:earth","el:fire"], note:"3% second odds if you already own one"},
+  Wrath:{price:7950, evolve:"Love", req:"all 10 different Tendrils of Wrath in your park"},
+  Love:{price:1140, r:["Flower","el:lightning"]},
+  Nosferatu:{price:2275, r:["el:earth","el:cold","el:fire"], night:true},
+  Eldritch:{price:11500, r:["el:fire","el:plant","el:earth","el:cold"]},
+  Oni:{price:2000, r:["el:fire","el:earth","el:cold"]},
+  Gatren:{price:4800, r:["Eldritch","Oni"]},
+  Amalgamate:{price:12960, r:["Bone","el:earth","el:fire","el:dark"], clone:"10%"},
+  Scout:{price:6480, r:["Valor","epic:Hidden"]},
+  Valor:{price:2200, r:["el:plant","el:metal","el:air"]},
+  Chromacorn:{price:6100, r:["Rainbow","Double Rainbow"], rift:true},
+  // --- not in the market ---
+  Apocalypse:{r:["el:plant","el:cold","el:metal","el:lightning"]},
+  Snowpocalypse:{r:["Winter","Apocalypse"], note:"Breedable this event, not sold in the market"},
+  Winter:{r:["el:cold","el:earth","el:air"], note:"Breedable this event (needed for Snowpocalypse)"},
+  Meteor:{r:["el:air","el:metal"]},
+  Pollen:{r:["el:plant","el:air"]},
+  Moon:{r:["el:cold","el:lightning"], night:true},
+  Flower:{r:["el:fire","el:plant"]},
+  Howl:{r:["el:dark","el:air"]},
+  Abyss:{r:["el:water","el:dark"]},
+  Antumbra:{r:["el:light","el:dark"], note:"Rift dragon: breed in the Rift with it aligned to Earth"},
+  Voltaic:{r:["el:dark","el:lightning"], note:"Rift dragon: breed in the Rift"},
+  Rainbow:{r:["special:4"]},
+  "Double Rainbow":{r:["special:4"]},
+  Ragnarok:{r:["el:fire","el:earth","el:cold","el:dark"]}
+};
+
+const EL_COLORS = {plant:"--plant",fire:"--fire",earth:"--earth",cold:"--cold",lightning:"--lightning",water:"--water",air:"--air",metal:"--metal",light:"--light",dark:"--dark"};
+const CDN = n => `https://dvboxcdn.com/dragons/${n}.webp`;
+const EGG = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><ellipse cx="20" cy="22" rx="12" ry="15" fill="#3d3158" stroke="#b678ff" stroke-width="2"/><text x="20" y="27" font-size="14" text-anchor="middle" fill="#efe9f7">?</text></svg>');
+
+const CANDY_URL = "https://static.wikia.nocookie.net/dragonvale/images/1/1d/Candy_template.png/revision/latest/scale-to-width-down/17?cb=20141009210348";
+const CANDY = `<img class="candy" src="https://static.wikia.nocookie.net/dragonvale/images/1/1d/Candy_template.png/revision/latest/scale-to-width-down/17?cb=20141009210348" alt="Candy">`;
+const fmt = n => n.toLocaleString("en-US");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const spriteOf = n => (D[n] && D[n].sprite) || n.replace(/ /g,"_");
+const labelOf = n => (D[n] && D[n].label) || n;
+const img = (n, alt) => `<img loading="lazy" src="${CDN(spriteOf(n))}" alt="${esc(alt||n)}" onerror="this.onerror=null;this.src='${EGG}'">`;
+
+function priceHTML(n){
+  const p = D[n] && D[n].price;
+  return p ? `<span class="price">${CANDY}${fmt(p)}</span>` : `<span class="price none">not in market</span>`;
+}
+function itemText(it){
+  if (it.startsWith("el:")) return it.slice(3);
+  if (it.startsWith("epic:")) return "any " + it.slice(5) + " epic";
+  if (it.startsWith("special:")) return "any 4 different elements";
+  return labelOf(it).toUpperCase();
+}
+function howText(n){
+  const d = D[n]; if (!d) return "";
+  if (d.evolve) return `Evolve from ${d.evolve}`;
+  if (d.r) return d.r.map(itemText).join(" + ");
+  return "";
+}
+function tagsHTML(n){
+  const d = D[n]; if (!d) return ""; const t = [];
+  if (d.night) t.push(`<span class="tag night">🌙 breed at night</span>`);
+  if (d.rift) t.push(`<span class="tag rift">🌀 Rift only · limited</span>`);
+  if (d.evolve) t.push(`<span class="tag evolve">✨ needs ${esc(d.req)}</span>`);
+  if (d.clone) t.push(`<span class="tag clone">🧬 co-op single-clone ${d.clone} beats breeding</span>`);
+  if (d.note) t.push(`<span class="tag">${esc(d.note)}</span>`);
+  return t.join("");
+}
+
+const FLAG = e => `https://dvboxcdn.com/flags/${e.toLowerCase()}.png`;
+const flagImg = (e, cls) => `<img class="${cls||"flag"}" loading="lazy" src="${FLAG(e)}" alt="${esc(e)}" title="${esc(e)}" onerror="this.onerror=null;this.src='${EGG}'">`;
+function elementNode(it){
+  if (it.startsWith("special:")) return `<div class="node elnode"><span class="leafpad"></span><span class="flag" style="font-size:22px;width:30px;text-align:center">🌈</span><span class="how">two parents with at least 4 different elements between them</span></div>`;
+  const epic = it.startsWith("epic:"), e = it.split(":")[1];
+  return `<div class="node elnode"><span class="leafpad"></span>${flagImg(e)}<span class="how">${epic ? `any ${esc(e)} epic dragon` : `any ${esc(e)} dragon`}</span></div>`;
+}
+
+// ---------- OBTAINED ----------
+const OWN_KEY = "cbxiii-obtained";
+let OWN = new Set();
+try { OWN = new Set(JSON.parse(localStorage.getItem(OWN_KEY) || "[]")); } catch(_) {}
+function saveOwn(){ try { localStorage.setItem(OWN_KEY, JSON.stringify([...OWN])); } catch(_) {} }
+const ownBtn = (n, big) => `<button type="button" class="own${big?" big":""}" data-own="${esc(n)}" aria-pressed="${OWN.has(n)}" title="Mark ${esc(labelOf(n))} as obtained">✓</button>`;
+function toggleOwn(n){
+  OWN.has(n) ? OWN.delete(n) : OWN.add(n);
+  saveOwn(); syncOwn(n);
+}
+function syncOwn(changed){
+  document.querySelectorAll("[data-own]").forEach(b=>b.setAttribute("aria-pressed", OWN.has(b.dataset.own)));
+  document.querySelectorAll(".card[data-name], ul.tree li[data-name], .shared .node[data-name], #tbl tr[data-name], .gnode[data-n]").forEach(e=>{
+    e.classList.toggle("owned", OWN.has(e.dataset.name || e.dataset.n));
+  });
+  if (changed && OWN.has(changed)) document.querySelectorAll(`ul.tree li[data-name="${CSS.escape(changed)}"] > details`).forEach(d=>d.open=false);
+  renderStats(); renderTable(); applyFilter();
+}
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-own]"); if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  if (G.moved && b.closest("#gview")) return;
+  toggleOwn(b.dataset.own);
+}, true);
+
+function nodeInner(n, hasKids){
+  const d = D[n] || {};
+  const how = howText(n);
+  const flags = [];
+  if (d.night) flags.push("🌙");
+  if (d.rift) flags.push("🌀 Rift");
+  if (d.clone) flags.push("🧬 clone "+d.clone);
+  return `<div class="node">${hasKids?'<span class="caret">▶</span>':'<span class="leafpad"></span>'}${ownBtn(n)}${img(n)}
+    <div class="meta"><span class="nm">${esc(labelOf(n))}</span>${how?`<span class="how">${esc(how)}</span>`:(d.note?`<span class="how">${esc(d.note)}</span>`:"")}${d.evolve?`<span class="how">needs ${esc(d.req)}</span>`:""}</div>
+    <div class="right">${priceHTML(n)}${flags.length?`<span class="badge-night">${flags.join(" · ")}</span>`:""}</div></div>`;
+}
+
+function children(n){
+  const d = D[n]; if (!d) return [];
+  if (d.evolve) return [d.evolve];
+  return d.r || [];
+}
+
+function renderNode(it, depth){
+  if (it.startsWith("el:") || it.startsWith("epic:")) return `<li>${elementNode(it)}</li>`;
+  const kids = children(it);
+  if (!kids.length) return `<li data-name="${esc(it)}">${nodeInner(it,false)}</li>`;
+  return `<li data-name="${esc(it)}"><details ${depth<3 && !OWN.has(it)?"open":""}><summary>${nodeInner(it,true)}</summary><ul>${kids.map(k=>renderNode(k,depth+1)).join("")}</ul></details></li>`;
+}
+
+// collect every specific dragon in a tree (excluding root)
+function collect(n, set){
+  for (const k of children(n)){
+    if (k.includes(":")) continue;
+    set.add(k); collect(k, set);
+  }
+  return set;
+}
+
+function card(n){
+  const d = D[n];
+  const kids = children(n);
+  const formula = d.evolve
+    ? `Evolve from <strong>${esc(d.evolve)}</strong>`
+    : kids.map(k => k.includes(":") ? flagImg(k.split(":")[1], "flag-sm") : `<strong>${esc(itemText(k))}</strong>`).join(" + ");
+  const all = [...collect(n,new Set())];
+  const buyable = kids.filter(k=>!k.includes(":") && D[k] && D[k].price);
+  const parentCost = buyable.reduce((s,k)=>s+D[k].price,0);
+  const allBuyable = buyable.length === kids.filter(k=>!k.includes(":")).length && buyable.length>0;
+  const sub = allBuyable && !d.evolve ? `<span class="tag subtotal">Buying the specific parents: ${CANDY}${fmt(parentCost)}</span>` : "";
+  const search = [n, ...all].join(" ").toLowerCase() + " " + kids.join(" ").toLowerCase();
+  return `<article class="card" data-name="${esc(n)}" data-price="${d.price}" data-search="${esc(search)}">
+    <div class="card-head">${img(n)}
+      <div><h2>${esc(labelOf(n))}</h2>${priceHTML(n)}
+      <div class="formula">${formula}</div>
+      <div class="tags">${tagsHTML(n)}${sub}</div>${ownBtn(n,true)}</div>
+    </div>
+    <div class="tree-wrap"><div class="lbl">Breeding tree</div>
+      <ul class="tree">${kids.map(k=>renderNode(k,1)).join("")}</ul>
+    </div></article>`;
+}
+
+// ---------- RENDER ----------
+const grid = document.getElementById("grid");
+let order = TARGETS.slice();
+function draw(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const s = document.getElementById("sort").value;
+  let list = TARGETS.slice();
+  if (s==="desc") list.sort((a,b)=>D[b].price-D[a].price);
+  if (s==="asc") list.sort((a,b)=>D[a].price-D[b].price);
+  if (s==="az") list.sort((a,b)=>a.localeCompare(b));
+  grid.innerHTML = list.map(card).join("") + `<div class="empty" hidden></div>`;
+  syncOwn();
+}
+function applyFilter(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const f = document.getElementById("ownf").value;
+  let shown = 0;
+  grid.querySelectorAll(".card").forEach(c=>{
+    const own = OWN.has(c.dataset.name);
+    const ok = (!q || c.dataset.search.includes(q)) && (f==="all" || (f==="have") === own);
+    c.style.display = ok ? "" : "none"; if (ok) shown++;
+  });
+  const empty = grid.querySelector(".empty");
+  empty.hidden = !!shown;
+  empty.textContent = f==="have" && !q ? "You haven't marked any of your targets as obtained yet." : f==="need" && !q ? "🎉 You've obtained every dragon on your list!" : "No dragons match your search.";
+}
+document.getElementById("q").addEventListener("input", applyFilter);
+document.getElementById("ownf").addEventListener("change", applyFilter);
+document.getElementById("clearown").onclick = ()=>{ if (OWN.size && confirm("Clear all obtained marks?")) { OWN.clear(); saveOwn(); syncOwn(); } };
+document.getElementById("sort").addEventListener("change", draw);
+document.getElementById("expand").onclick = ()=>grid.querySelectorAll("details").forEach(d=>d.open=true);
+document.getElementById("collapse").onclick = ()=>grid.querySelectorAll("details").forEach(d=>d.open=false);
+// stats
+const total = TARGETS.reduce((s,n)=>s+D[n].price,0);
+const maxN = TARGETS.reduce((a,b)=>D[a].price>=D[b].price?a:b);
+const minN = TARGETS.reduce((a,b)=>D[a].price<=D[b].price?a:b);
+function renderStats(){
+const have = TARGETS.filter(n=>OWN.has(n));
+const left = TARGETS.filter(n=>!OWN.has(n)).reduce((s,n)=>s+D[n].price,0);
+document.getElementById("stats").innerHTML = `
+  <div class="stat"><b style="color:var(--good)">${have.length} / ${TARGETS.length}</b><small>obtained</small></div>
+  <div class="stat"><b>${CANDY}${fmt(left)}</b><small>to buy the rest${have.length?` (of ${fmt(total)})`:""}</small></div>
+  <div class="stat"><b>${esc(maxN)}</b><small>most expensive (${CANDY}${fmt(D[maxN].price)})</small></div>
+  <div class="stat"><b>${esc(labelOf(minN))}</b><small>cheapest (${CANDY}${fmt(D[minN].price)})</small></div>`;
+}
+
+// shared ingredients
+const usage = {};
+TARGETS.forEach(t=>{ collect(t,new Set()).forEach(n=>{ (usage[n] ||= []).push(t); }); });
+const shared = Object.entries(usage).filter(([,v])=>v.length>=2).sort((a,b)=>b[1].length-a[1].length || a[0].localeCompare(b[0]));
+document.getElementById("shared").innerHTML = shared.map(([n,v])=>`
+  <div class="node" data-name="${esc(n)}" title="Used in: ${esc(v.join(", "))}">${ownBtn(n)}${img(n)}
+    <div class="meta"><span class="nm">${esc(n)}</span><span class="how">in ${v.length} trees: ${esc(v.join(", "))}</span></div>
+    <div class="right">${priceHTML(n)}</div></div>`).join("");
+
+// table
+function renderTable(){
+const rows = TARGETS.slice().sort((a,b)=>D[b].price-D[a].price);
+const left = TARGETS.filter(n=>!OWN.has(n)).reduce((s,n)=>s+D[n].price,0);
+document.getElementById("tbl").innerHTML = `<thead><tr><th></th><th>Dragon</th><th>How to get</th><th style="text-align:right">Price</th></tr></thead><tbody>` +
+  rows.map(n=>`<tr data-name="${esc(n)}" class="${OWN.has(n)?"owned":""}"><td class="ownc">${ownBtn(n)}</td><td>${img(n)}<b>${esc(labelOf(n))}</b></td><td>${esc(D[n].evolve?`Evolve from ${D[n].evolve} (${D[n].req})`:howText(n))}${D[n].rift?" · Rift only":""}</td><td class="num">${CANDY}${fmt(D[n].price)}</td></tr>`).join("") +
+  `</tbody><tfoot><tr><th colspan="3">Total for all ${TARGETS.length}</th><th style="text-align:right">${CANDY}${fmt(total)}</th></tr>` +
+  `<tr><th colspan="3" style="color:var(--good)">Still to buy (${TARGETS.length - TARGETS.filter(n=>OWN.has(n)).length} not obtained)</th><th style="text-align:right;color:var(--good)">${CANDY}${fmt(left)}</th></tr></tfoot>`;
+}
+
+// ---------- TABS ----------
+function showTab(t){
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===t));
+  document.getElementById("tab-cards").hidden = t!=="cards";
+  document.getElementById("tab-graph").hidden = t!=="graph";
+  if (t==="graph") initGraph();
+  history.replaceState(null,"", t==="graph" ? "#graph" : location.pathname + location.search);
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+// ---------- GRAPH ----------
+const SVGNS = "http://www.w3.org/2000/svg";
+const NW = 220, NH = 82;
+const G = {ready:false, k:1, x:0, y:0, w:0, h:0, pos:{}};
+const el = (tag, attrs, parent) => { const e = document.createElementNS(SVGNS, tag); for (const a in attrs) e.setAttribute(a, attrs[a]); if (parent) parent.appendChild(e); return e; };
+
+function graphNodes(){
+  const set = new Set();
+  const walk = n => { if (set.has(n)) return; set.add(n); children(n).forEach(c=>{ if(!c.includes(":")) walk(c); }); };
+  TARGETS.forEach(walk);
+  return [...set];
+}
+let USEDBY = null;
+function descendants(n, set=new Set()){
+  if (!USEDBY){ USEDBY = {}; Object.keys(D).forEach(m=>children(m).forEach(c=>{ if(!c.includes(":")) (USEDBY[c] ||= []).push(m); })); }
+  set.add(n);
+  (USEDBY[n]||[]).forEach(m=>{ if (!set.has(m)) descendants(m,set); });
+  return set;
+}
+function ancestors(n, set=new Set()){
+  set.add(n);
+  children(n).forEach(c=>{ if(!c.includes(":") && !set.has(c)) ancestors(c,set); });
+  return set;
+}
+
+function drawNode(n, x, y, world){
+  const d = D[n] || {};
+  const cls = TARGETS.includes(n) ? "target" : (d.price ? "market" : "nomarket");
+  const g = el("g", {class:`gnode ${cls}${OWN.has(n)?" owned":""}`, transform:`translate(${x},${y})`, "data-n":n}, world);
+  el("title", {}, g).textContent = labelOf(n) + (howText(n) ? " = " + howText(n) : "") + (d.req ? " (needs " + d.req + ")" : "") + (d.note ? "\n" + d.note : "");
+  el("rect", {class:"box", width:NW, height:NH, rx:10}, g);
+  const im = el("image", {href:CDN(spriteOf(n)), x:6, y:9, width:60, height:60, preserveAspectRatio:"xMidYMid meet"}, g);
+  im.addEventListener("error", ()=>im.setAttribute("href", EGG), {once:true});
+  let name = labelOf(n);
+  const flags = [d.night?"🌙":"", d.rift?"🌀":""].join("");
+  el("text", {x:72, y:24}, g).textContent = name + (flags ? " " + flags : "");
+  if (d.price){
+    el("image", {href:CANDY_URL, x:72, y:32, width:13, height:15}, g);
+    el("text", {class:"pr", x:89, y:45}, g).textContent = fmt(d.price);
+  } else {
+    el("text", {class:"pr", x:72, y:45}, g).textContent = "not in market";
+  }
+  const els = (d.r||[]).filter(k=>k.includes(":"));
+  if (els.length){
+    el("text", {class:"fl", x:72, y:69}, g).textContent = "+";
+    els.forEach((k,i)=>{
+      if (k.startsWith("special:")) { el("text", {class:"fl", x:84 + i*22, y:69}, g).textContent = "any 4 elements 🌈"; return; }
+      const e = k.split(":")[1];
+      const f = el("image", {href:FLAG(e), x:84 + i*22, y:56, width:18, height:18}, g);
+      el("title", {}, f).textContent = "any " + e + " dragon";
+    });
+  } else if (d.evolve){
+    el("text", {class:"fl", x:72, y:69}, g).textContent = "✨ evolution";
+  }
+  const ob = el("g", {class:"gown", "data-own":n, "aria-pressed":OWN.has(n)}, g);
+  el("title", {}, ob).textContent = "Mark " + labelOf(n) + " as obtained";
+  el("circle", {cx:NW-16, cy:16, r:10}, ob);
+  el("text", {x:NW-16, y:20.5, "text-anchor":"middle"}, ob).textContent = "✓";
+  g.addEventListener("click", ev=>{ if (G.moved) return; ev.stopPropagation(); setFocus(G.focus===n ? "" : n); });
+}
+
+async function initGraph(){
+  if (G.ready || G.busy) { if (G.ready) fitGraph(); return; }
+  G.busy = true;
+  const status = document.getElementById("gstatus");
+  if (typeof ELK === "undefined"){ status.textContent = "Couldn't load the graph layout library (needs an internet connection)."; return; }
+  const nodes = graphNodes();
+  const edges = [];
+  nodes.forEach(n=>children(n).forEach(c=>{ if(!c.includes(":")) edges.push({id:`${c}→${n}`, sources:[c], targets:[n], evolve:!!D[n].evolve}); }));
+  const graph = {
+    id:"root",
+    layoutOptions:{
+      "elk.algorithm":"layered", "elk.direction":"RIGHT", "elk.edgeRouting":"ORTHOGONAL",
+      "elk.layered.spacing.nodeNodeBetweenLayers":"80", "elk.spacing.nodeNode":"22",
+      "elk.layered.spacing.edgeNodeBetweenLayers":"20", "elk.spacing.edgeEdge":"10",
+      "elk.layered.nodePlacement.strategy":"NETWORK_SIMPLEX", "elk.padding":"[top=30,left=30,bottom=30,right=30]"
+    },
+    children: nodes.map(n=>({id:n, width:NW, height:NH})),
+    edges: edges.map(e=>({id:e.id, sources:e.sources, targets:e.targets}))
+  };
+  let res;
+  try { res = await new ELK().layout(graph); }
+  catch(err){ status.textContent = "Graph layout failed: " + err.message; G.busy=false; return; }
+  const world = document.getElementById("gworld");
+  const eg = el("g", {}, world), ng = el("g", {}, world);
+  res.edges.forEach((e,i)=>{
+    const sec = e.sections && e.sections[0]; if (!sec) return;
+    const pts = [sec.startPoint, ...(sec.bendPoints||[]), sec.endPoint];
+    const dpath = pts.map((p,j)=>(j?"L":"M")+p.x+","+p.y).join(" ");
+    el("path", {d:dpath, class:"gedge" + (edges[i].evolve?" evolve":""), "marker-end":"url(#arr)", "data-s":edges[i].sources[0], "data-t":edges[i].targets[0]}, eg);
+  });
+  res.children.forEach(c=>{ G.pos[c.id]=c; drawNode(c.id, c.x, c.y, ng); });
+  G.w = res.width; G.h = res.height;
+  status.remove();
+  // focus dropdown
+  const sel = document.getElementById("gfocus");
+  const others = nodes.filter(n=>!TARGETS.includes(n)).sort();
+  sel.innerHTML = `<option value="">— all dragons —</option><optgroup label="Your targets">${TARGETS.slice().sort().map(n=>`<option value="${esc(n)}">${esc(labelOf(n))}</option>`).join("")}</optgroup><optgroup label="Ingredients">${others.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("")}</optgroup>`;
+  sel.onchange = ()=>setFocus(sel.value, true);
+  G.ready = true; G.busy = false;
+  fitGraph();
+}
+
+function applyT(){ document.getElementById("gworld").setAttribute("transform", `translate(${G.x},${G.y}) scale(${G.k})`); }
+function fitGraph(box){
+  const v = document.getElementById("gview").getBoundingClientRect();
+  if (!v.width) return;
+  const b = box || {x:0, y:0, w:G.w, h:G.h};
+  G.k = Math.min(v.width/b.w, v.height/b.h, 1.4) * 0.95;
+  G.x = (v.width - b.w*G.k)/2 - b.x*G.k; G.y = (v.height - b.h*G.k)/2 - b.y*G.k;
+  applyT();
+}
+function zoomAt(f, cx, cy){
+  const k = Math.max(0.1, Math.min(3, G.k*f)); f = k/G.k;
+  G.x = cx - (cx - G.x)*f; G.y = cy - (cy - G.y)*f; G.k = k; applyT();
+}
+function setFocus(n, zoom){
+  G.focus = n || "";
+  document.getElementById("gfocus").value = G.focus;
+  const up = n ? ancestors(n) : null, down = n ? descendants(n) : null;
+  const keep = n ? new Set([...up, ...down]) : null;
+  document.querySelectorAll(".gnode").forEach(g=>{
+    const m = g.dataset.n;
+    g.classList.toggle("dim", !!keep && !keep.has(m));
+    g.classList.toggle("sel", m===n);
+    g.classList.toggle("down", !!down && m!==n && down.has(m));
+  });
+  document.querySelectorAll(".gedge").forEach(p=>{
+    const a = !!up && up.has(p.dataset.s) && up.has(p.dataset.t);
+    const b = !!down && down.has(p.dataset.s) && down.has(p.dataset.t);
+    p.classList.toggle("hl", a); p.classList.toggle("hl2", b); p.classList.toggle("dim", !!keep && !a && !b);
+  });
+  const info = document.getElementById("ginfo");
+  if (n){
+    const used = (USEDBY[n]||[]).map(labelOf);
+    info.innerHTML = `<b>${esc(labelOf(n))}</b>: <span style="color:var(--accent)">orange</span> = what you need to breed it` + (used.length ? ` · <span style="color:var(--cold)">blue</span> = what it's used for (directly: ${esc(used.join(", "))})` : ` · not used to breed any other dragon here`);
+  } else info.textContent = "";
+  if (n && zoom){
+    let x1=Infinity,y1=Infinity,x2=-Infinity,y2=-Infinity;
+    keep.forEach(m=>{ const p=G.pos[m]; x1=Math.min(x1,p.x); y1=Math.min(y1,p.y); x2=Math.max(x2,p.x+NW); y2=Math.max(y2,p.y+NH); });
+    fitGraph({x:x1-40, y:y1-40, w:x2-x1+80, h:y2-y1+80});
+  }
+}
+
+(function(){
+  const view = document.getElementById("gview");
+  const ptrs = new Map(); let last = null, pinch = null;
+  view.addEventListener("wheel", e=>{
+    e.preventDefault(); const r = view.getBoundingClientRect();
+    zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015)), e.clientX-r.left, e.clientY-r.top);
+  }, {passive:false});
+  view.addEventListener("pointerdown", e=>{
+    ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); G.moved = false; last = {x:e.clientX, y:e.clientY};
+    if (ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch = Math.hypot(a.x-b.x, a.y-b.y); }
+  });
+  view.addEventListener("pointermove", e=>{
+    if (!ptrs.has(e.pointerId)) return;
+    ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+    if (ptrs.size===2 && pinch){
+      const [a,b]=[...ptrs.values()], d=Math.hypot(a.x-b.x, a.y-b.y), r=view.getBoundingClientRect();
+      zoomAt(d/pinch, (a.x+b.x)/2-r.left, (a.y+b.y)/2-r.top); pinch=d; G.moved=true; return;
+    }
+    const dx=e.clientX-last.x, dy=e.clientY-last.y;
+    if (!G.moved && Math.hypot(dx,dy) < 4) return;
+    if (!G.moved){ G.moved = true; view.classList.add("dragging"); try{ view.setPointerCapture(e.pointerId); }catch(_){} }
+    G.x += dx; G.y += dy; last = {x:e.clientX, y:e.clientY}; applyT();
+  });
+  const up = e=>{ ptrs.delete(e.pointerId); if (ptrs.size<2) pinch=null; view.classList.remove("dragging"); };
+  view.addEventListener("pointerup", up); view.addEventListener("pointercancel", up);
+  view.addEventListener("click", ()=>{ if (!G.moved && G.ready) setFocus(""); });
+  const center = f=>{ const r=view.getBoundingClientRect(); zoomAt(f, r.width/2, r.height/2); };
+  document.getElementById("gzin").onclick = ()=>center(1.25);
+  document.getElementById("gzout").onclick = ()=>center(0.8);
+  document.getElementById("gfit").onclick = ()=>{ if (G.ready) G.focus ? setFocus(G.focus,true) : fitGraph(); };
+  window.addEventListener("resize", ()=>{ if (G.ready && !document.getElementById("tab-graph").hidden) (G.focus ? setFocus(G.focus,true) : fitGraph()); });
+})();
+draw();
+if (location.hash === "#graph") showTab("graph");
+</script>
+</body>
+</html>

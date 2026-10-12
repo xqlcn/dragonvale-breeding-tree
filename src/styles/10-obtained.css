@@ -1,0 +1,15 @@
+/* "Obtained" toggle buttons and owned-state highlighting outside the graph. */
+button.own{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #57497a;background:transparent;color:transparent;font:800 13px/1 system-ui,sans-serif;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+button.own:hover{border-color:var(--good);color:var(--good)}
+button.own[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#0d2416}
+button.own.big{width:auto;height:auto;border-radius:99px;padding:5px 12px;gap:6px;color:var(--muted);font-size:12px;margin-top:8px}
+button.own.big::after{content:"Mark obtained"}
+button.own.big[aria-pressed="true"]{color:#0d2416}
+button.own.big[aria-pressed="true"]::after{content:"Obtained"}
+.card.owned{border-color:var(--good)}
+.card.owned .card-head{background:linear-gradient(135deg,#1d3527,var(--panel))}
+li.owned > .node, li.owned > details > summary > .node{background:rgba(126,224,161,.10);border-color:rgba(126,224,161,.35)}
+.shared .node.owned{border-color:var(--good)}
+#tbl tr.owned td{opacity:.55}
+#tbl tr.owned b{text-decoration:line-through}
+#tbl td.ownc{width:44px}

@@ -1,0 +1,6 @@
+/* Cards-tab toolbar (sticky search/sort bar). */
+.bar{position:sticky;top:0;z-index:5;background:rgba(20,16,28,.92);backdrop-filter:blur(6px);display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:16px}
+.bar input,.bar select,.bar button{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+.bar input{flex:1 1 200px;min-width:0}
+.bar button{cursor:pointer}
+.bar button:hover{border-color:var(--accent)}

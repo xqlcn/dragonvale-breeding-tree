@@ -1,0 +1,7 @@
+/* Stats tiles and the price legend. */
+.stats{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 6px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.stat b{display:block;font-size:20px;color:var(--accent)}
+.stat small{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 14px;color:var(--muted);font-size:13px;margin:8px 0 4px}
+.legend .el{font-size:12px}
