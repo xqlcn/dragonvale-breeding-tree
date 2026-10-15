@@ -2,7 +2,6 @@ import { memo, useState, type MouseEvent } from "react";
 import { CANDY_ICON_URL } from "../../config";
 import { DRAGONS } from "../../data/dragons";
 import { dragonSpriteUrl, EGG_PLACEHOLDER_URL, elementFlagUrl } from "../../lib/assets";
-import { isTarget } from "../../lib/breeding";
 import { formatCandy } from "../../lib/format";
 import { howToObtainText, labelOf, parseIngredient } from "../../lib/ingredients";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout";
@@ -12,6 +11,8 @@ interface Props {
   x: number;
   y: number;
   owned: boolean;
+  /** On the active list (orange border). */
+  target: boolean;
   /** Extra classes from the current focus highlight (" dim", " sel", " down"). */
   highlight: string;
   onSelect: (name: string, e: MouseEvent) => void;
@@ -28,10 +29,10 @@ function tooltip(name: string): string {
 }
 
 /** One dragon box in the breeding graph. */
-export const GraphNode = memo(function GraphNode({ name, x, y, owned, highlight, onSelect, onToggleOwned }: Props) {
+export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, highlight, onSelect, onToggleOwned }: Props) {
   const d = DRAGONS[name] ?? {};
   const [spriteFailed, setSpriteFailed] = useState(false);
-  const kind = isTarget(name) ? "target" : d.price ? "market" : "nomarket";
+  const kind = target ? "target" : d.price ? "market" : "nomarket";
   const nameFlags = (d.breedAtNight ? "🌙" : "") + (d.riftOnly ? "🌀" : "");
   const extraRequirements = (d.recipe ?? []).map(parseIngredient).filter((i) => i.kind !== "dragon");
 

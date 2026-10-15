@@ -24,7 +24,7 @@ export function CardsView() {
     <>
       <p className="hint">
         Click any dragon in a tree to expand / collapse it. Click a <b style={{ color: "var(--good)" }}>✓</b> circle to
-        mark a dragon as obtained. Your progress is saved in this browser.
+        mark a dragon as obtained. Your progress and your list are saved in this browser.
       </p>
       <CardsToolbar
         query={query} onQueryChange={setQuery}

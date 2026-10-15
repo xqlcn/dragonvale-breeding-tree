@@ -18,7 +18,7 @@ export interface GraphLayout {
   height: number;
 }
 
-/** ELK "layered" layout, left → right, orthogonal edges. Tuned for ~60 nodes of NODE_WIDTH×NODE_HEIGHT. */
+/** ELK "layered" layout, left → right, orthogonal edges. Tuned for ~60–150 nodes of NODE_WIDTH×NODE_HEIGHT. */
 const LAYOUT_OPTIONS: Record<string, string> = {
   "elk.algorithm": "layered",
   "elk.direction": "RIGHT",
@@ -32,8 +32,8 @@ const LAYOUT_OPTIONS: Record<string, string> = {
 };
 
 /** Nodes = every dragon in any target's tree; edges = ingredient → dragon it breeds/evolves into. */
-export function buildGraph(): { nodes: string[]; edges: GraphEdge[] } {
-  const nodes = allTreeDragons();
+export function buildGraph(targets: readonly string[]): { nodes: string[]; edges: GraphEdge[] } {
+  const nodes = allTreeDragons(targets);
   const edges: GraphEdge[] = [];
   for (const n of nodes) {
     for (const c of dragonRequirementsOf(n)) {
@@ -47,8 +47,8 @@ export function buildGraph(): { nodes: string[]; edges: GraphEdge[] } {
  * Lays out the breeding graph. ELK (~1.4 MB) is code-split and only downloaded
  * the first time the graph tab is opened.
  */
-export async function layoutGraph(): Promise<GraphLayout> {
-  const { nodes, edges } = buildGraph();
+export async function layoutGraph(targets: readonly string[]): Promise<GraphLayout> {
+  const { nodes, edges } = buildGraph(targets);
   let ElkCtor: typeof import("elkjs/lib/elk.bundled.js").default;
   try {
     ElkCtor = (await import("elkjs/lib/elk.bundled.js")).default;

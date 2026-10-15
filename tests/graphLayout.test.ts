@@ -1,20 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { boundingBox, buildGraph, layoutGraph, NODE_HEIGHT, NODE_WIDTH } from "../src/components/graph/layout";
+import { DEFAULT_FAVORITES, EVENT_DRAGONS } from "../src/data/targets";
 import { edgeHighlightClasses, focusSets, nodeHighlightClasses } from "../src/components/graph/focus";
 
 describe("graph layout", () => {
   it("builds one edge per specific ingredient, flagging evolutions", () => {
-    const { nodes, edges } = buildGraph();
-    expect(nodes).toHaveLength(57);
-    expect(edges).toHaveLength(53);
+    const { nodes, edges } = buildGraph(EVENT_DRAGONS);
+    expect(nodes).toHaveLength(145);
+    expect(edges).toHaveLength(142);
+    expect(buildGraph(DEFAULT_FAVORITES).nodes).toHaveLength(57);
+    expect(buildGraph(DEFAULT_FAVORITES).edges).toHaveLength(53);
     expect(edges.find((e) => e.id === "Love→Wrath")?.evolve).toBe(true);
     expect(edges.find((e) => e.id === "Scourge→Reaper")?.evolve).toBe(false);
   });
 
   it("lays out every node and edge with ELK", async () => {
-    const layout = await layoutGraph();
-    expect(Object.keys(layout.positions)).toHaveLength(57);
-    expect(layout.edges).toHaveLength(53);
+    const layout = await layoutGraph(EVENT_DRAGONS);
+    expect(Object.keys(layout.positions)).toHaveLength(145);
+    expect(layout.edges).toHaveLength(142);
     expect(layout.edges[0]?.path).toMatch(/^M[\d.]+,[\d.]+( L[\d.]+,[\d.]+)+$/);
     expect(layout.width).toBeGreaterThan(NODE_WIDTH);
     const box = boundingBox(["Reaper"], layout.positions);

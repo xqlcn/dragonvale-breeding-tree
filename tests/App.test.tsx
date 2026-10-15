@@ -1,8 +1,8 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
-import { OBTAINED_STORAGE_KEY } from "../src/config";
+import { FAVORITES_STORAGE_KEY, LIST_SCOPE_STORAGE_KEY, OBTAINED_STORAGE_KEY } from "../src/config";
 
 const card = (name: string) => document.querySelector<HTMLElement>(`.card[data-name="${name}"]`)!;
 const visibleCards = () => [...document.querySelectorAll<HTMLElement>(".card")].filter((c) => c.style.display !== "none").map((c) => c.dataset.name);
@@ -124,4 +124,85 @@ describe("tabs", () => {
     render(<App />);
     expect(screen.getByRole("tab", { name: /Breeding graph/ })).toHaveAttribute("aria-selected", "true");
   });
+});
+
+describe("My list vs all event dragons", () => {
+  const scopeButton = (scope: string) => document.querySelector<HTMLButtonElement>(`#scope [data-scope="${scope}"]`)!;
+
+  it("starts on the original 23-dragon list and can switch to every event dragon", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    expect(scopeButton("favorites")).toHaveAttribute("aria-pressed", "true");
+    expect(document.querySelectorAll(".card")).toHaveLength(23);
+
+    await user.click(scopeButton("all"));
+    expect(document.querySelectorAll(".card")).toHaveLength(106);
+    expect(document.querySelectorAll("#tbl tbody tr")).toHaveLength(106);
+    expect(stat(0)).toBe("0 / 106obtained");
+    expect(stat(1)).toBe("848,209to buy the rest");
+    expect(stat(3)).toBe("Bonecheapest (760)");
+    expect(localStorage.getItem(LIST_SCOPE_STORAGE_KEY)).toBe("all");
+  });
+
+  it("☆ adds a dragon to my list, ★ removes it, and the list is saved", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await user.click(scopeButton("all"));
+    await user.click(card("Tickles").querySelector<HTMLButtonElement>("button.fav.big")!);
+    expect(card("Tickles").querySelector("button.fav.big")).toHaveAttribute("aria-pressed", "true");
+    expect(scopeButton("favorites")).toHaveTextContent("24");
+
+    await user.click(scopeButton("favorites"));
+    expect(document.querySelectorAll(".card")).toHaveLength(24);
+    expect(visibleCards().at(-1)).toBe("Tickles"); // added to the end of "Your list order"
+    expect(stat(0)).toBe("0 / 24obtained");
+    expect(stat(2)).toBe("Exterreanmost expensive (18,500)");
+    expect(JSON.parse(localStorage.getItem(FAVORITES_STORAGE_KEY)!)).toContain("Tickles");
+
+    await user.click(card("Reaper").querySelector<HTMLButtonElement>("button.fav.big")!);
+    expect(card("Reaper")).toBeNull();
+    expect(document.querySelectorAll(".card")).toHaveLength(23);
+  });
+
+  it("stats, price table and shared ingredients follow a saved custom list", () => {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, '["Gatren","Fortified","Bogus"]');
+    localStorage.setItem(OBTAINED_STORAGE_KEY, '["Fortified"]');
+    render(<App />);
+    expect(visibleCards()).toEqual(["Gatren", "Fortified"]); // unknown names are dropped
+    expect(stat(0)).toBe("1 / 2obtained");
+    expect(stat(1)).toBe("4,800to buy the rest (of 22,300)");
+    expect([...document.querySelectorAll("#tbl tbody tr")].map((r) => r.getAttribute("data-name"))).toEqual(["Fortified", "Gatren"]);
+    expect([...document.querySelectorAll("#shared .node")].map((n) => n.getAttribute("data-name"))).toEqual(["Eldritch", "Oni"]);
+  });
+
+  it("an empty list shows guidance instead of cards, and reset restores the default", async () => {
+    const user = userEvent.setup();
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    localStorage.setItem(FAVORITES_STORAGE_KEY, "[]");
+    render(<App />);
+    expect(document.querySelectorAll(".card")).toHaveLength(0);
+    expect(document.querySelector(".empty")).toHaveTextContent(/Your list is empty/);
+    expect(stat(0)).toBe("0 / 0obtained");
+    expect(stat(2)).toBe("—most expensive");
+
+    await user.click(document.getElementById("resetfav")!);
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(document.querySelectorAll(".card")).toHaveLength(23);
+    confirmSpy.mockRestore();
+  });
+
+  it("the graph only shows the active list's trees", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem(FAVORITES_STORAGE_KEY, '["Gatren"]');
+    render(<App />);
+    await user.click(screen.getByRole("tab", { name: /Breeding graph/ }));
+    await screen.findAllByText("Gatren", { selector: ".gnode text" }, { timeout: 15_000 });
+    expect([...document.querySelectorAll(".gnode")].map((g) => g.getAttribute("data-n")).sort()).toEqual(["Eldritch", "Gatren", "Oni"]);
+    expect(document.querySelector('.gnode[data-n="Gatren"]')).toHaveClass("target");
+    expect(document.querySelector('.gnode[data-n="Oni"]')).not.toHaveClass("target");
+
+    await user.click(scopeButton("all"));
+    await waitFor(() => expect(document.querySelectorAll(".gnode")).toHaveLength(145), { timeout: 15_000 });
+    expect(document.querySelector('.gnode[data-n="Oni"]')).toHaveClass("target");
+  }, 30_000);
 });

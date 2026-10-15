@@ -1,5 +1,4 @@
 import { DRAGONS } from "../data/dragons";
-import { TARGETS } from "../data/targets";
 import type { RecipeItem } from "../data/types";
 import { isDragonItem } from "./ingredients";
 
@@ -48,28 +47,27 @@ export function downstreamOf(name: string, into = new Set<string>()): Set<string
   return into;
 }
 
-/** Every dragon reachable from the targets, targets first in list order (graph node set). */
-export function allTreeDragons(): string[] {
+/** Every dragon reachable from `targets`, targets first in list order (graph node set). */
+export function allTreeDragons(targets: readonly string[]): string[] {
   const seen = new Set<string>();
   const walk = (n: string) => {
     if (seen.has(n)) return;
     seen.add(n);
     dragonRequirementsOf(n).forEach(walk);
   };
-  TARGETS.forEach(walk);
+  targets.forEach(walk);
   return [...seen];
 }
 
 export interface SharedIngredient { name: string; usedInTargets: string[] }
 
-/** Dragons appearing in 2+ target trees, most-shared first, then A→Z. */
-export function sharedIngredients(): SharedIngredient[] {
+/** Dragons appearing in 2+ of the given targets' trees, most-shared first, then A→Z. */
+export function sharedIngredients(targets: readonly string[]): SharedIngredient[] {
   const usage: Record<string, string[]> = {};
-  for (const t of TARGETS) for (const n of treeDragons(t)) (usage[n] ??= []).push(t);
+  for (const t of targets) for (const n of treeDragons(t)) (usage[n] ??= []).push(t);
   return Object.entries(usage)
     .filter(([, v]) => v.length >= 2)
     .sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]))
     .map(([name, usedInTargets]) => ({ name, usedInTargets }));
 }
 
-export const isTarget = (name: string): boolean => TARGETS.includes(name);

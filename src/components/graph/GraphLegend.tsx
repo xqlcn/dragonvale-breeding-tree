@@ -1,7 +1,7 @@
 /** Key for node borders, edge styles and interactions in the breeding graph. */
 export const GraphLegend = () => (
   <div className="glegend">
-    <span><i className="sw target"></i>Your target dragons</span>
+    <span><i className="sw target"></i>Dragons on the current list</span>
     <span><i className="sw market"></i>In market (ingredient)</span>
     <span><i className="sw nomarket"></i>Not in market</span>
     <span>

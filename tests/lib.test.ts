@@ -8,7 +8,7 @@ import {
   cheapestTarget, mostExpensiveTarget, parentPurchaseCost, remainingTargetPrice, totalTargetPrice,
 } from "../src/lib/pricing";
 import { cardMatches, cardSearchText, emptyMessage, sortTargets } from "../src/lib/targetList";
-import { TARGETS } from "../src/data/targets";
+import { DEFAULT_FAVORITES, EVENT_DRAGONS } from "../src/data/targets";
 
 describe("ingredients", () => {
   it("parses every notation", () => {
@@ -44,21 +44,34 @@ describe("breeding relationships", () => {
 
   it("walks upstream and downstream", () => {
     expect(upstreamOf("Gatren")).toEqual(new Set(["Gatren", "Eldritch", "Oni"]));
-    expect(usedBy("Scourge")).toEqual(["Reaper", "Dracomancy", "Exterrean"]);
-    expect(downstreamOf("Decay")).toEqual(new Set(["Decay", "Punk", "Scourge", "Reaper", "Dracomancy", "Exterrean"]));
+    expect(usedBy("Scourge")).toEqual(["Reaper", "Dracomancy", "Exterrean", "Malefice"]);
+    expect(downstreamOf("Decay")).toEqual(new Set([
+      "Decay", "Punk", "Scourge", "Reaper", "Dracomancy", "Exterrean", "Malefice", "Pit", "Dracabra", "Brood", "Greymatter", "Rotblossom",
+    ]));
   });
 
-  it("graph covers 57 dragons, targets first", () => {
-    const nodes = allTreeDragons();
-    expect(nodes).toHaveLength(57);
-    expect(nodes[0]).toBe(TARGETS[0]);
+  it("graph nodes cover the given list's trees, targets first", () => {
+    const all = allTreeDragons(EVENT_DRAGONS);
+    expect(all).toHaveLength(145);
+    expect(all[0]).toBe(EVENT_DRAGONS[0]);
+    expect(allTreeDragons(DEFAULT_FAVORITES)).toHaveLength(57);
+    expect(allTreeDragons(["Gatren"])).toEqual(["Gatren", "Eldritch", "Oni"]);
+    expect(allTreeDragons([])).toEqual([]);
   });
 
   it("ranks shared ingredients by usage then name", () => {
-    const shared = sharedIngredients();
-    expect(shared[0]).toEqual({
+    expect(sharedIngredients(DEFAULT_FAVORITES)[0]).toEqual({
       name: "Spectre",
       usedInTargets: ["Reaper", "Yaga", "Spirit", "Wendigo", "Hydnellum", "Charlatan", "Macabre"],
+    });
+    expect(sharedIngredients(["Gatren"])).toEqual([]);
+    const shared = sharedIngredients(EVENT_DRAGONS);
+    expect(shared[0]).toEqual({
+      name: "Spectre",
+      usedInTargets: [
+        "Reaper", "Yaga", "Spirit", "Wendigo", "Hydnellum", "Charlatan", "Macabre",
+        "Sinking", "Dragpir", "Malefice", "Dortal", "Eww", "Iden", "Tickles",
+      ],
     });
     for (const s of shared) expect(s.usedInTargets.length).toBeGreaterThanOrEqual(2);
     for (let i = 1; i < shared.length; i++) {
@@ -70,10 +83,16 @@ describe("breeding relationships", () => {
 
 describe("pricing", () => {
   it("totals and extremes", () => {
-    expect(totalTargetPrice()).toBe(236720);
-    expect(remainingTargetPrice(new Set(["Reaper"]))).toBe(221720);
-    expect(mostExpensiveTarget()).toBe("Exterrean");
-    expect(cheapestTarget()).toBe("Dracomancy");
+    expect(totalTargetPrice(EVENT_DRAGONS)).toBe(848209);
+    expect(remainingTargetPrice(EVENT_DRAGONS, new Set(["Reaper"]))).toBe(833209);
+    expect(mostExpensiveTarget(EVENT_DRAGONS)).toBe("Exterrean");
+    expect(cheapestTarget(EVENT_DRAGONS)).toBe("Bone");
+    expect(totalTargetPrice(DEFAULT_FAVORITES)).toBe(236720);
+    expect(remainingTargetPrice(DEFAULT_FAVORITES, new Set(["Reaper", "Bone"]))).toBe(221720);
+    expect(cheapestTarget(DEFAULT_FAVORITES)).toBe("Dracomancy");
+    expect(totalTargetPrice([])).toBe(0);
+    expect(mostExpensiveTarget([])).toBeNull();
+    expect(cheapestTarget([])).toBeNull();
     expect(formatCandy(236720)).toBe("236,720");
   });
 
@@ -87,15 +106,17 @@ describe("pricing", () => {
 
 describe("card list", () => {
   it("sorts", () => {
-    expect(sortTargets("list")).toEqual([...TARGETS]);
-    expect(sortTargets("desc")[0]).toBe("Exterrean");
-    expect(sortTargets("asc")[0]).toBe("Dracomancy");
-    expect(sortTargets("az").slice(0, 2)).toEqual(["Awoo", "Barbarous"]);
+    expect(sortTargets(EVENT_DRAGONS, "list")).toEqual([...EVENT_DRAGONS]);
+    expect(sortTargets(EVENT_DRAGONS, "desc")[0]).toBe("Exterrean");
+    expect(sortTargets(EVENT_DRAGONS, "asc")[0]).toBe("Bone");
+    expect(sortTargets(EVENT_DRAGONS, "az").slice(0, 2)).toEqual(["Amalgamate", "Ambrosia"]);
+    expect(sortTargets(DEFAULT_FAVORITES, "az").slice(0, 2)).toEqual(["Awoo", "Barbarous"]);
+    expect(sortTargets(["Spirit", "Bone"], "list")).toEqual(["Spirit", "Bone"]);
   });
 
   it("searches whole trees and raw recipe items", () => {
     expect(cardSearchText("Reaper")).toContain("scourge");
-    expect(TARGETS.filter((t) => cardMatches(t, "scourge", "all", false))).toEqual(["Reaper", "Dracomancy", "Exterrean"]);
+    expect(EVENT_DRAGONS.filter((t) => cardMatches(t, "scourge", "all", false))).toEqual(["Reaper", "Dracomancy", "Exterrean", "Malefice", "Scourge"]);
     expect(cardMatches("Infernus", "fire", "all", false)).toBe(true);
   });
 
@@ -104,5 +125,6 @@ describe("card list", () => {
     expect(cardMatches("Reaper", "", "need", true)).toBe(false);
     expect(emptyMessage("", "need")).toMatch(/obtained every dragon/);
     expect(emptyMessage("x", "need")).toBe("No dragons match your search.");
+    expect(emptyMessage("", "all", true)).toMatch(/Your list is empty/);
   });
 });

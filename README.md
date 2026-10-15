@@ -1,6 +1,8 @@
 # Candy Bash XIII — Breeding Trees
 
-An interactive planner for the DragonVale **Candy Bash XIII: FEAR** event. For each of 23 target dragons it shows:
+An interactive planner for the DragonVale **Candy Bash XIII: FEAR** event. It covers all 106 dragons in the event
+market, and lets you keep a **⭐ My list** of the dragons you're going for. A switch at the top picks **My list** or
+**All event dragons**, and everything below follows it:
 
 - **Trees & prices**: a card per dragon with its full, collapsible breeding tree, Candy market prices, special
   conditions (night, Rift, evolution, cloning), search / sort / "obtained" filters, a list of shared ingredients and a
@@ -8,7 +10,9 @@ An interactive planner for the DragonVale **Candy Bash XIII: FEAR** event. For e
 - **Breeding graph**: every dragon involved, auto-laid-out with ELK. You can pan, zoom (wheel or pinch) and
   click a box to highlight what it needs (orange) and what uses it (blue).
 - **Progress tracking**: tick the ✓ on any dragon to mark it obtained. Progress is stored in your browser and shared
-  across both views.
+  across both views and both lists.
+- **My list**: press ☆ on a card (or in the price table) to add a dragon, ★ to remove it. It starts as the original
+  23-dragon list; "Reset my list" restores that. The list and the selected view are saved in your browser.
 
 The original single-file version is kept for reference in [`legacy/`](legacy/candy-bash-xiii-breeding-tree.html).
 
@@ -36,12 +40,12 @@ global CSS is kept verbatim so the look is pixel-identical.
 ├── src/
 │   ├── main.tsx               Mounts <App/> and the global stylesheet
 │   ├── App.tsx                Page shell: header, stats, legend, tabs, footer
-│   ├── config.ts              External asset URLs, localStorage key
+│   ├── config.ts              External asset URLs, localStorage keys
 │   ├── assets/egg.svg         Placeholder shown when a sprite fails to load
 │   ├── data/                  ← edit these to change dragons / prices
 │   │   ├── types.ts           Dragon + recipe-notation types, element list
 │   │   ├── dragons.ts         Every dragon: price, recipe / evolution, flags, notes
-│   │   └── targets.ts         The dragons you want, in list order
+│   │   └── targets.ts         All event-market dragons + the default "My list"
 │   ├── lib/                   Pure, framework-free logic (unit tested)
 │   │   ├── ingredients.ts     Parse "el:fire" / "epic:X" / "special:4"; text helpers
 │   │   ├── breeding.ts        Tree walking, upstream/downstream, shared ingredients
@@ -51,7 +55,9 @@ global CSS is kept verbatim so the look is pixel-identical.
 │   │   └── format.ts          Number formatting
 │   ├── state/
 │   │   ├── ObtainedContext.tsx  "Obtained" set shared by every view (useObtained())
-│   │   └── obtainedStorage.ts   localStorage persistence
+│   │   ├── obtainedStorage.ts   localStorage persistence
+│   │   ├── TargetListContext.tsx "My list" + list switch; `targets` = the active list (useTargetList())
+│   │   └── targetListStorage.ts localStorage persistence for the list and switch
 │   ├── hooks/useHashTab.ts    Active tab ↔ URL hash (#graph)
 │   ├── components/
 │   │   ├── common/            Reusable bits: Price, DragonSprite, ElementFlag, ObtainedToggle, DragonTags…
@@ -120,7 +126,11 @@ because Fandom rejects hot-linked images that carry a third-party `Referer`.
 - **Change prices, recipes or add a dragon**: edit `src/data/dragons.ts`. Recipe notation is documented on
   `RecipeItem` in `src/data/types.ts`. Run `npm test`: `tests/data.test.ts` catches typos such as unknown dragon names
   or elements.
-- **Change which dragons you're targeting**: edit `src/data/targets.ts` (order = "Your list order").
+- **Change the event dragon list or the default "My list"**: edit `src/data/targets.ts`. Your own list is edited in
+  the app (☆/★) and lives in localStorage, so changing `DEFAULT_FAVORITES` only affects people who haven't
+  customized theirs (or who press "Reset my list").
+- **Logic that depends on the list**: functions in `src/lib/` take the target list as a parameter; components get the
+  active one from `useTargetList().targets`.
 - **New dragon attribute** (e.g. a new tag): add the field to `Dragon` in `src/data/types.ts`, render it in
   `src/components/common/DragonTags.tsx` (cards) and/or `src/components/graph/GraphNode.tsx` (graph).
 - **New derived numbers / rules**: put pure functions in `src/lib/` and test them in `tests/lib.test.ts`. Keep React

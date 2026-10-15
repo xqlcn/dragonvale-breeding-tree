@@ -1,21 +1,22 @@
 import { DRAGONS } from "../data/dragons";
-import { TARGETS } from "../data/targets";
 import { isDragonItem } from "./ingredients";
 import { requirementsOf } from "./breeding";
 
 /** Market price of a target (targets are always priced). */
 export const priceOf = (name: string): number => DRAGONS[name]?.price ?? 0;
 
-export const totalTargetPrice = (): number => TARGETS.reduce((s, n) => s + priceOf(n), 0);
+export const totalTargetPrice = (targets: readonly string[]): number => targets.reduce((s, n) => s + priceOf(n), 0);
 
 /** Sum of prices for targets not yet obtained. */
-export const remainingTargetPrice = (owned: ReadonlySet<string>): number =>
-  TARGETS.filter((n) => !owned.has(n)).reduce((s, n) => s + priceOf(n), 0);
+export const remainingTargetPrice = (targets: readonly string[], owned: ReadonlySet<string>): number =>
+  targets.filter((n) => !owned.has(n)).reduce((s, n) => s + priceOf(n), 0);
 
-/** Most expensive target (first one wins ties). */
-export const mostExpensiveTarget = (): string => TARGETS.reduce((a, b) => (priceOf(a) >= priceOf(b) ? a : b));
-/** Cheapest target (first one wins ties). */
-export const cheapestTarget = (): string => TARGETS.reduce((a, b) => (priceOf(a) <= priceOf(b) ? a : b));
+/** Most expensive target (first one wins ties), or null for an empty list. */
+export const mostExpensiveTarget = (targets: readonly string[]): string | null =>
+  targets.length ? targets.reduce((a, b) => (priceOf(a) >= priceOf(b) ? a : b)) : null;
+/** Cheapest target (first one wins ties), or null for an empty list. */
+export const cheapestTarget = (targets: readonly string[]): string | null =>
+  targets.length ? targets.reduce((a, b) => (priceOf(a) <= priceOf(b) ? a : b)) : null;
 
 /**
  * Cost of buying a dragon's specific parents, or null when not every specific parent is

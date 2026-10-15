@@ -7,6 +7,7 @@ import { useObtained } from "../../state/ObtainedContext";
 import { CandyAmount } from "../common/CandyAmount";
 import { DragonSprite } from "../common/DragonSprite";
 import { DragonTags } from "../common/DragonTags";
+import { FavoriteToggle } from "../common/FavoriteToggle";
 import { ElementFlag } from "../common/ElementFlag";
 import { ObtainedToggle } from "../common/ObtainedToggle";
 import { Price } from "../common/Price";
@@ -32,11 +33,14 @@ export function DragonCard({ name, hidden }: { name: string; hidden: boolean }) 
             )}
           </div>
           <ObtainedToggle name={name} big />
+          <FavoriteToggle name={name} big />
         </div>
       </div>
       <div className="tree-wrap">
         <div className="lbl">Breeding tree</div>
-        <BreedingTree name={name} />
+        {requirementsOf(name).length > 0
+          ? <BreedingTree name={name} />
+          : <p className="hint">Can't be bred: buy it from the market or clone it at the co-op.</p>}
       </div>
     </article>
   );
@@ -46,6 +50,7 @@ export function DragonCard({ name, hidden }: { name: string; hidden: boolean }) 
 function Formula({ name }: { name: string }) {
   const d = DRAGONS[name];
   if (d?.evolvesFrom) return <>Evolve from <strong>{d.evolvesFrom}</strong></>;
+  if (requirementsOf(name).length === 0) return <>Buy / clone only</>;
   return (
     <>
       {requirementsOf(name).map((item, i) => {

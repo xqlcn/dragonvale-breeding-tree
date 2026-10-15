@@ -1,8 +1,9 @@
 import type { DragonCatalog } from "./types";
 
 /**
- * Every dragon that appears in any target's breeding tree.
- * Source: DV Community Forum Candy Bash XIII thread (Oct 8, 2026).
+ * Every Candy Bash XIII event dragon plus every dragon in their breeding trees.
+ * Source: DV Community Forum Candy Bash XIII thread (Oct 8, 2026) for prices, notes and cloning tips;
+ * recipes cross-checked against DV Box (dvbox.bin.sh) data.
  * Recipe notation is documented on `RecipeItem` in ./types.ts.
  */
 export const DRAGONS: DragonCatalog = {
@@ -59,6 +60,82 @@ export const DRAGONS: DragonCatalog = {
   Valor: { price: 2200, recipe: ["el:plant", "el:metal", "el:air"] },
   Chromacorn: { price: 6100, recipe: ["Rainbow", "Double Rainbow"], riftOnly: true },
 
+  // --- other event-market dragons: Limited ---
+  Torment: {
+    price: 15250, recipe: ["Rust", "el:dark", "el:fire"],
+    note: "New limited: 5% base odds; co-op single-clone 10% (15% if the other parent is Rust)",
+  },
+  Eggony: { price: 14000, note: "New limited, buy / clone only (can't be bred). Clone at the co-op (10%) with Fire, Earth, Dark, Obsidian, Watch or Root" },
+  Hollowjaw: { price: 15150, note: "New limited, buy / clone only (can't be bred). Clone at the co-op (10%) with Dark, Earth, Plant, Forest, Snootroot or Root" },
+
+  // --- other event-market dragons: Otherworldly ---
+  Mirhor: { price: 15000, recipe: ["Dungeon", "Mirror"], cloneChance: "10%" },
+  Tartarus: { price: 15000, recipe: ["Stygian", "Cave"] },
+  Sinking: { price: 15000, recipe: ["Spirit", "el:dark", "el:water"], cloneChance: "10%" },
+  Brainiac: { price: 15000, recipe: ["Kwall", "el:water", "el:dark"], cloneChance: "10%" },
+  Righteous: { price: 15000, recipe: ["Sun", "el:light", "el:fire"] },
+  Pit: { price: 15000, recipe: ["Decay", "el:dark", "el:fire"], cloneChance: "10%" },
+  Dumi: { price: 15000, recipe: ["Trick", "Bone"], cloneChance: "10%" },
+  Dragpir: { price: 12000, recipe: ["Wendigo", "el:dark"], cloneChance: "10%" },
+  Spooker: { price: 13000, recipe: ["Oni", "el:dark", "el:air"], cloneChance: "10%" },
+  "Drack-o-Lantern": { price: 13500, recipe: ["Plumpkin", "Gourd"], sprite: "Drack_o_Lantern", cloneChance: "10%" },
+  Candycorn: { price: 16500, recipe: ["Ambrosia", "epic:Hidden"] },
+  Thicket: { price: 1000, recipe: ["el:earth", "el:plant", "el:cold"] },
+  Dracabra: { price: 1900, recipe: ["Lycan", "Decay"] },
+  Nether: { price: 2250, recipe: ["el:fire", "el:metal", "el:earth"] },
+  Bog: { price: 2275, recipe: ["el:water", "el:plant", "el:fire"] },
+  Ambrosia: { price: 3500, recipe: ["Flower", "Delight"] },
+  Delight: { price: 3750, recipe: ["el:plant", "el:fire", "el:cold"] },
+  Malefice: { price: 5800, recipe: ["Spirit", "Scourge"] },
+  Maw: { price: 6000, recipe: ["Trick", "Ortreat"] },
+  Narcis: { price: 7000, recipe: ["Ouroboros", "el:metal", "el:dark"], cloneChance: "10%" },
+  Funis: { price: 7360, recipe: ["Wick", "Bog"], cloneChance: "10%" },
+  Combustion: { price: 7450, recipe: ["el:fire", "el:air", "el:metal", "el:dark"] },
+  Grimoire: { price: 8000, recipe: ["el:cold", "el:air", "el:light", "el:dark"], cloneChance: "10%" },
+  Dortal: { price: 8560, recipe: ["Kwall", "Iden"], cloneChance: "10%" },
+  Magma: { price: 12000, recipe: ["Lava", "Infernus"], cloneChance: "10%" },
+  Shackle: { price: 12500, recipe: ["Kage", "el:metal", "el:dark"], cloneChance: "10%" },
+  Omen: { price: 5000, recipe: ["Moon", "Apocalypse"] },
+  Eww: { price: 13000, recipe: ["Ooze", "Dortal"], cloneChance: "10%" },
+
+  // --- other event-market dragons: Ominous ---
+  Gourd: { price: 2200, recipe: ["Pepper", "Root"] },
+  Cerberus: { price: 4500, recipe: ["Hydra", "Obsidian"] },
+  Nesting: { price: 6080, recipe: ["el:fire", "el:plant", "el:earth", "el:cold"] },
+  Porcelain: { price: 7150, evolvesFrom: "Bone", evolveRequirement: "all 10 different Ornaments of Porcelain in your park" },
+  Plumpkin: { price: 7500, recipe: ["el:plant", "el:fire", "el:earth"] },
+  Ocular: { price: 7800, recipe: ["Cyclops", "Barbarous"] },
+  Iden: { price: 7960, recipe: ["Charlatan", "Nightbloom"] },
+  Hyperion: { price: 9500, recipe: ["Fury", "Narcis"] },
+  "Heavy Metal": { price: 9600, recipe: ["Wrath", "Thrasher"] },
+  Techno: { price: 11500, recipe: ["Surge", "Kwall"] },
+  Brood: { price: 12000, recipe: ["Dracabra", "Gatren"], cloneChance: "10%" },
+  Rotblossom: { price: 12640, recipe: ["Thicket", "Decay"], cloneChance: "10%" },
+  Greymatter: { price: 15000, recipe: ["Zombie", "Brood"], cloneChance: "5%" },
+  Machina: { price: 16000, recipe: ["Combustion", "el:metal", "el:lightning"], cloneChance: "10%" },
+  Tickles: { price: 17000, recipe: ["Hydnellum", "Macabre"], cloneChance: "5%" },
+
+  // --- other event-market dragons: Haunted (Ghostly) ---
+  "Ghostly Plant": { price: 2750, evolvesFrom: "Plant", evolveRequirement: "the Effigy of the Leaf in your park" },
+  "Ghostly Fire": { price: 2750, evolvesFrom: "Fire", evolveRequirement: "the Effigy of the Flame in your park" },
+  "Ghostly Earth": { price: 2750, evolvesFrom: "Earth", evolveRequirement: "the Effigy of the Ground in your park" },
+  "Ghostly Cold": { price: 2750, evolvesFrom: "Cold", evolveRequirement: "the Effigy of the Frost in your park" },
+  "Ghostly Lava": { price: 2750, recipe: ["Ghostly Earth", "Ghostly Fire"] },
+  "Ghostly Obsidian": { price: 2750, recipe: ["Ghostly Earth", "Ghostly Fire"] },
+  "Ghostly Mountain": { price: 2750, recipe: ["Ghostly Earth", "Ghostly Cold"] },
+  "Ghostly Glacier": { price: 2750, recipe: ["Ghostly Earth", "Ghostly Cold"] },
+  "Ghostly Nosferatu": { price: 2750, recipe: ["Ghostly Mountain", "Ghostly Fire"] },
+  "Ghostly Bone": { price: 2750, recipe: ["Ghostly Fire", "Ghostly Earth"] },
+  "Ghostly Decay": { price: 2750, recipe: ["Ghostly Obsidian", "Ghostly Cold"] },
+  "Ghostly Oni": { price: 2750, recipe: ["Ghostly Lava", "Ghostly Cold"] },
+  "Ghostly Spectre": { price: 2750, recipe: ["Ghostly Cold", "Ghostly Earth"] },
+  "Ghostly Spirit": { price: 2750, recipe: ["Ghostly Ghost", "Ghostly Spectre"] },
+  "Ghostly Ghost": { price: 2750, recipe: ["Ghostly Cold", "Ghostly Earth"] },
+
+  // --- other event-market dragons: Tricks & Treats ---
+  Trick: { price: 5000, recipe: ["el:plant", "el:fire", "el:earth"], note: "2,500 Candy at park levels 11–30" },
+  Ortreat: { price: 5000, recipe: ["el:plant", "el:fire", "el:earth"], note: "2,500 Candy at park levels 11–30" },
+
   // --- not in the market ---
   Apocalypse: { recipe: ["el:plant", "el:cold", "el:metal", "el:lightning"] },
   Snowpocalypse: { recipe: ["Winter", "Apocalypse"], note: "Breedable this event, not sold in the market" },
@@ -74,4 +151,31 @@ export const DRAGONS: DragonCatalog = {
   Rainbow: { recipe: ["special:4"] },
   "Double Rainbow": { recipe: ["special:4"] },
   Ragnarok: { recipe: ["el:fire", "el:earth", "el:cold", "el:dark"] },
+
+  // --- not in the market: components of the other event dragons ---
+  Rust: { recipe: ["el:water", "el:metal"] },
+  Dungeon: { recipe: ["el:dark", "el:fire"] },
+  Mirror: { recipe: ["el:light", "el:metal"] },
+  Stygian: { recipe: ["el:dark", "el:fire", "el:metal"], note: "Limited dragon: only breedable while it's released" },
+  Cave: { recipe: ["el:dark", "el:earth"] },
+  Sun: { recipe: ["el:cold", "el:lightning"], note: "Breed during the day (7am–7pm)" },
+  Ouroboros: { recipe: ["Magnetic", "el:water"] },
+  Magnetic: { recipe: ["el:lightning", "el:metal"] },
+  Wick: { recipe: ["el:fire", "el:light"] },
+  Lava: { recipe: ["el:earth", "el:fire"] },
+  Ooze: { recipe: ["el:dark", "el:water"] },
+  Pepper: { recipe: ["el:fire", "el:plant"] },
+  Root: { recipe: ["el:earth", "el:dark"] },
+  Hydra: { recipe: ["Quake", "Current"] },
+  Quake: { recipe: ["el:earth", "el:lightning"] },
+  Current: { recipe: ["el:water", "el:lightning"] },
+  Obsidian: { recipe: ["el:earth", "el:fire"] },
+  Cyclops: { recipe: ["el:lightning", "el:water", "el:metal"] },
+  Nightbloom: { recipe: ["el:plant", "el:dark", "epic:Moon"] },
+  Surge: { recipe: ["el:lightning", "el:water"] },
+  Thrasher: { recipe: ["el:lightning", "el:metal"] },
+  Plant: { note: "Basic elemental dragon (buy with DragonCash)" },
+  Fire: { note: "Basic elemental dragon (buy with DragonCash)" },
+  Earth: { note: "Basic elemental dragon (buy with DragonCash)" },
+  Cold: { note: "Basic elemental dragon (buy with DragonCash)" },
 };

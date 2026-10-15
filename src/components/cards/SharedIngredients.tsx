@@ -1,14 +1,17 @@
 import { sharedIngredients } from "../../lib/breeding";
+import { useMemo } from "react";
 import { useObtained } from "../../state/ObtainedContext";
+import { useTargetList } from "../../state/TargetListContext";
 import { DragonSprite } from "../common/DragonSprite";
 import { ObtainedToggle } from "../common/ObtainedToggle";
 import { Price } from "../common/Price";
 
-const SHARED = sharedIngredients();
 
 /** Dragons used in several target trees: the best ones to get first. */
 export function SharedIngredients() {
   const { isOwned } = useObtained();
+  const { targets } = useTargetList();
+  const shared = useMemo(() => sharedIngredients(targets), [targets]);
   return (
     <section className="extra">
       <h3>🔁 Shared ingredients</h3>
@@ -16,7 +19,7 @@ export function SharedIngredients() {
         Dragons that show up in the trees of several of your targets. Owning these first saves the most work.
       </p>
       <div className="shared" id="shared">
-        {SHARED.map(({ name, usedInTargets }) => (
+        {shared.map(({ name, usedInTargets }) => (
           <div key={name} className={isOwned(name) ? "node owned" : "node"} data-name={name} title={`Used in: ${usedInTargets.join(", ")}`}>
             <ObtainedToggle name={name} />
             <DragonSprite name={name} />

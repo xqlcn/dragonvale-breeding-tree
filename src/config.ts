@@ -10,3 +10,7 @@ export const CANDY_ICON_URL =
 
 /** localStorage key for the "obtained" set. Kept identical to the original single-file version. */
 export const OBTAINED_STORAGE_KEY = "cbxiii-obtained";
+/** localStorage key for "My list" (ordered array of dragon names). */
+export const FAVORITES_STORAGE_KEY = "cbxiii-favorites";
+/** localStorage key for which list is shown: "favorites" or "all". */
+export const LIST_SCOPE_STORAGE_KEY = "cbxiii-list-scope";

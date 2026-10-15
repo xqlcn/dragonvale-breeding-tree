@@ -3,17 +3,21 @@ import { GraphView } from "./components/graph/GraphView";
 import { Footer } from "./components/layout/Footer";
 import { Header } from "./components/layout/Header";
 import { Legend } from "./components/layout/Legend";
+import { ListScopeBar } from "./components/layout/ListScopeBar";
 import { StatsBar } from "./components/layout/StatsBar";
 import { Tabs } from "./components/layout/Tabs";
 import { useHashTab } from "./hooks/useHashTab";
 import { ObtainedProvider } from "./state/ObtainedContext";
+import { TargetListProvider } from "./state/TargetListContext";
 
 export function App() {
   const [tab, setTab] = useHashTab();
   return (
     <ObtainedProvider>
+    <TargetListProvider>
       <Header />
       <main>
+        <ListScopeBar />
         <StatsBar />
         <Legend />
         <Tabs active={tab} onSelect={setTab} />
@@ -26,6 +30,7 @@ export function App() {
         </div>
       </main>
       <Footer />
+    </TargetListProvider>
     </ObtainedProvider>
   );
 }

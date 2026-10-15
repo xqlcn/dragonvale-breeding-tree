@@ -1,9 +1,10 @@
-import { TARGETS } from "../../data/targets";
 import { labelOf } from "../../lib/ingredients";
 
 interface Props {
   /** Graph nodes; options are only listed once the layout is ready. */
   nodes: readonly string[] | null;
+  /** The active list's dragons (listed first in the dropdown). */
+  targets: readonly string[];
   focus: string;
   onFocusChange: (name: string) => void;
   onZoomIn: () => void;
@@ -11,8 +12,8 @@ interface Props {
   onFit: () => void;
 }
 
-export function GraphToolbar({ nodes, focus, onFocusChange, onZoomIn, onZoomOut, onFit }: Props) {
-  const ingredients = nodes ? nodes.filter((n) => !TARGETS.includes(n)).sort() : [];
+export function GraphToolbar({ nodes, targets, focus, onFocusChange, onZoomIn, onZoomOut, onFit }: Props) {
+  const ingredients = nodes ? nodes.filter((n) => !targets.includes(n)).sort() : [];
   return (
     <div className="gbar">
       <label>
@@ -22,7 +23,7 @@ export function GraphToolbar({ nodes, focus, onFocusChange, onZoomIn, onZoomOut,
           {nodes && (
             <>
               <optgroup label="Your targets">
-                {TARGETS.slice().sort().map((n) => <option key={n} value={n}>{labelOf(n)}</option>)}
+                {targets.slice().sort().map((n) => <option key={n} value={n}>{labelOf(n)}</option>)}
               </optgroup>
               <optgroup label="Ingredients">
                 {ingredients.map((n) => <option key={n} value={n}>{n}</option>)}

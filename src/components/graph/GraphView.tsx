@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { usedBy } from "../../lib/breeding";
 import { labelOf } from "../../lib/ingredients";
 import { useObtained } from "../../state/ObtainedContext";
+import { useTargetList } from "../../state/TargetListContext";
 import { edgeHighlightClasses, focusSets, nodeHighlightClasses } from "./focus";
 import { GraphLegend } from "./GraphLegend";
 import { GraphNode } from "./GraphNode";
@@ -10,12 +11,16 @@ import { boundingBox, layoutGraph, type Box, type GraphLayout } from "./layout";
 import { usePanZoom } from "./usePanZoom";
 
 /**
- * "Breeding graph" tab. The layout is computed lazily the first time the tab becomes `active`;
- * after that the graph stays mounted (just hidden) so pan/zoom/focus survive tab switches.
+ * "Breeding graph" tab for the active list. The layout is computed lazily while the tab is `active`,
+ * once per distinct list (cached), and the graph stays mounted (just hidden) so pan/zoom/focus survive
+ * tab switches.
  */
 export function GraphView({ active }: { active: boolean }) {
   const { isOwned, toggle } = useObtained();
-  const [layout, setLayout] = useState<GraphLayout | null>(null);
+  const { targets } = useTargetList();
+  const listKey = targets.join("|");
+  const [layouts, setLayouts] = useState<ReadonlyMap<string, GraphLayout>>(new Map());
+  const layout = layouts.get(listKey) ?? null;
   const [status, setStatus] = useState("Laying out graph…");
   const [focus, setFocus] = useState("");
   const focusRef = useRef(focus);
@@ -25,13 +30,25 @@ export function GraphView({ active }: { active: boolean }) {
   const worldRef = useRef<SVGGElement>(null);
   const { fit, zoomAtCenter, movedRef } = usePanZoom(viewRef, worldRef);
 
-  // Kick off the (code-split) ELK layout the first time the tab is shown.
-  const layoutStarted = useRef(false);
+  // Lay out the (code-split) ELK graph for this list the first time it's shown; results are cached per list.
   useEffect(() => {
-    if (!active || layoutStarted.current) return;
-    layoutStarted.current = true;
-    layoutGraph().then(setLayout, (err: Error) => setStatus(err.message));
-  }, [active]);
+    if (!active || layouts.has(listKey)) return;
+    if (!targets.length) { setStatus("Your list is empty. Switch to “All event dragons” and press ☆ on a card to add dragons."); return; }
+    let cancelled = false;
+    setStatus("Laying out graph…");
+    layoutGraph(targets).then(
+      (l) => { if (!cancelled) setLayouts((m) => new Map(m).set(listKey, l)); },
+      (err: Error) => { if (!cancelled) setStatus(err.message); },
+    );
+    return () => { cancelled = true; };
+  }, [active, listKey, targets, layouts]);
+
+  // Drop the highlight when its dragon isn't in the current list's graph.
+  useEffect(() => {
+    if (layout && focus && !layout.nodes.includes(focus)) setFocus("");
+  }, [layout, focus]);
+
+  const targetSet = useMemo(() => new Set(targets), [targets]);
 
   const fullBox = useCallback((l: GraphLayout): Box => ({ x: 0, y: 0, w: l.width, h: l.height }), []);
 
@@ -78,6 +95,7 @@ export function GraphView({ active }: { active: boolean }) {
     <>
       <GraphToolbar
         nodes={layout?.nodes ?? null}
+        targets={targets}
         focus={focus}
         onFocusChange={(n) => focusOn(n, true)}
         onZoomIn={() => zoomAtCenter(1.25)}
@@ -85,7 +103,7 @@ export function GraphView({ active }: { active: boolean }) {
         onFit={refit}
       />
       <GraphLegend />
-      <div id="ginfo"><FocusInfo focus={focus} /></div>
+      <div id="ginfo">{layout && <FocusInfo focus={focus} nodes={layout.nodes} />}</div>
       <div id="gview" ref={viewRef} onClick={() => { if (!movedRef.current && layout) focusOn(""); }}>
         <svg id="gsvg">
           <defs>
@@ -119,6 +137,7 @@ export function GraphView({ active }: { active: boolean }) {
                         x={p.x}
                         y={p.y}
                         owned={isOwned(n)}
+                        target={targetSet.has(n)}
                         highlight={nodeHighlightClasses(n, focus, sets)}
                         onSelect={onSelectNode}
                         onToggleOwned={onToggleOwned}
@@ -136,9 +155,9 @@ export function GraphView({ active }: { active: boolean }) {
   );
 }
 
-function FocusInfo({ focus }: { focus: string }) {
+function FocusInfo({ focus, nodes }: { focus: string; nodes: readonly string[] }) {
   if (!focus) return null;
-  const used = usedBy(focus).map(labelOf);
+  const used = usedBy(focus).filter((n) => nodes.includes(n)).map(labelOf);
   return (
     <>
       <b>{labelOf(focus)}</b>: <span style={{ color: "var(--accent)" }}>orange</span> = what you need to breed it
