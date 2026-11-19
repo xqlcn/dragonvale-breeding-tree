@@ -23,8 +23,8 @@ const LAYOUT_OPTIONS: Record<string, string> = {
   "elk.algorithm": "layered",
   "elk.direction": "RIGHT",
   "elk.edgeRouting": "ORTHOGONAL",
-  "elk.layered.spacing.nodeNodeBetweenLayers": "80",
-  "elk.spacing.nodeNode": "22",
+  "elk.layered.spacing.nodeNodeBetweenLayers": "96",
+  "elk.spacing.nodeNode": "28",
   "elk.layered.spacing.edgeNodeBetweenLayers": "20",
   "elk.spacing.edgeEdge": "10",
   "elk.layered.nodePlacement.strategy": "NETWORK_SIMPLEX",
@@ -76,10 +76,27 @@ export async function layoutGraph(targets: readonly string[]): Promise<GraphLayo
   for (const e of edges) {
     const sec = sectionsById.get(e.id);
     if (!sec) continue;
-    const pts = [sec.startPoint, ...(sec.bendPoints ?? []), sec.endPoint];
-    positioned.push({ ...e, path: pts.map((p, j) => `${j ? "L" : "M"}${p.x},${p.y}`).join(" ") });
+    positioned.push({ ...e, path: roundedPath([sec.startPoint, ...(sec.bendPoints ?? []), sec.endPoint]) });
   }
   return { nodes, positions, edges: positioned, width: res.width ?? 0, height: res.height ?? 0 };
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+/** SVG path through orthogonal points with each corner rounded (radius shrinks on short segments). */
+export function roundedPath(pts: readonly Point[], radius = 10): string {
+  const f = (p: Point) => `${round1(p.x)},${round1(p.y)}`;
+  let d = `M${f(pts[0]!)}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const [a, b, c] = [pts[i - 1]!, pts[i]!, pts[i + 1]!];
+    const r = Math.min(radius, Math.hypot(b.x - a.x, b.y - a.y) / 2, Math.hypot(c.x - b.x, c.y - b.y) / 2);
+    const toward = (from: Point, to: Point, dist: number): Point => {
+      const len = Math.hypot(to.x - from.x, to.y - from.y) || 1;
+      return { x: from.x + ((to.x - from.x) / len) * dist, y: from.y + ((to.y - from.y) / len) * dist };
+    };
+    d += ` L${f(toward(b, a, r))} Q${f(b)} ${f(toward(b, c, r))}`;
+  }
+  return `${d} L${f(pts[pts.length - 1]!)}`;
 }
 
 /** Bounding box (with margin) around a set of laid-out nodes. */

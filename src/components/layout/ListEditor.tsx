@@ -53,7 +53,7 @@ export function ListEditor({ onClose }: { onClose: () => void }) {
               {s.shown.map((n) => (
                 <label key={n} className={isFavorite(n) ? "litem on" : "litem"} data-name={n}>
                   <input type="checkbox" checked={isFavorite(n)} onChange={() => toggleFavorite(n)} />
-                  <DragonSprite name={n} />
+                  <DragonSprite name={n} alt="" />
                   <span className="nm">{labelOf(n)}</span>
                   <Price name={n} />
                 </label>

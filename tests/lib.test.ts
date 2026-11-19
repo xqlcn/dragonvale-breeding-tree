@@ -7,7 +7,7 @@ import { howToObtainText, ingredientText, labelOf, parseIngredient } from "../sr
 import {
   cheapestTarget, mostExpensiveTarget, parentPurchaseCost, remainingTargetPrice, totalTargetPrice,
 } from "../src/lib/pricing";
-import { cardMatches, cardSearchText, emptyMessage, sortTargets } from "../src/lib/targetList";
+import { cardMatches, cardSearchText, emptyMessage, isReadyToBreed, sortTargets } from "../src/lib/targetList";
 import { DEFAULT_FAVORITES, EVENT_DRAGONS } from "../src/data/targets";
 
 describe("ingredients", () => {
@@ -23,9 +23,9 @@ describe("ingredients", () => {
     expect(ingredientText("el:dark")).toBe("dark");
     expect(ingredientText("epic:Hidden")).toBe("any Hidden epic");
     expect(ingredientText("special:4")).toBe("any 4 different elements");
-    expect(ingredientText("Drak-E")).toBe("DRAK-E");
-    expect(howToObtainText("Fubuki")).toBe("SAKURA + ELKAR");
-    expect(howToObtainText("Drak-E")).toBe("EARTHCORE + metal + cold");
+    expect(ingredientText("Drak-E")).toBe("Drak-E");
+    expect(howToObtainText("Fubuki")).toBe("Sakura + Elkar");
+    expect(howToObtainText("Drak-E")).toBe("Earthcore + metal + cold");
     expect(howToObtainText("Thaw")).toBe("Evolve from Cubicle");
     expect(howToObtainText("Dazzling")).toBe("any Ornamental epic + any Ornamental epic");
     expect(howToObtainText("Kraka & Krummi")).toBe(""); // buy / clone only
@@ -114,17 +114,32 @@ describe("card list", () => {
     expect(sortTargets(["Yeti", "Reindeer"], "list")).toEqual(["Yeti", "Reindeer"]);
   });
 
+  const none = () => false;
+  const owns = (...names: string[]) => (n: string) => names.includes(n);
+
   it("searches whole trees and raw recipe items", () => {
     expect(cardSearchText("Magni")).toContain("fulgurite");
-    expect(EVENT_DRAGONS.filter((t) => cardMatches(t, "zero", "all", false))).toEqual(["Magni", "Thaw", "Cubicle", "Zero"]);
-    expect(cardMatches("Om", "water", "all", false)).toBe(true);
+    expect(EVENT_DRAGONS.filter((t) => cardMatches(t, "zero", "all", none))).toEqual(["Magni", "Thaw", "Cubicle", "Zero"]);
+    expect(cardMatches("Om", "water", "all", none)).toBe(true);
   });
 
-  it("filters by obtained state", () => {
-    expect(cardMatches("Magni", "", "have", true)).toBe(true);
-    expect(cardMatches("Magni", "", "need", true)).toBe(false);
+  it("filters by obtained / still needed / ready to breed", () => {
+    expect(cardMatches("Magni", "", "have", owns("Magni"))).toBe(true);
+    expect(cardMatches("Magni", "", "need", owns("Magni"))).toBe(false);
+    expect(cardMatches("Magni", "", "ready", owns("Zero"))).toBe(false); // Fulgurite still missing
+    expect(cardMatches("Magni", "", "ready", owns("Zero", "Fulgurite"))).toBe(true);
     expect(emptyMessage("", "need")).toMatch(/obtained every dragon/);
+    expect(emptyMessage("", "ready")).toMatch(/Nothing is ready yet/);
     expect(emptyMessage("x", "need")).toBe("No dragons match your search.");
     expect(emptyMessage("", "all", true)).toMatch(/Your list is empty/);
+  });
+
+  it("ready to breed: every specific parent (or evolution source) obtained", () => {
+    expect(isReadyToBreed("Jawny", owns("Yeti"))).toBe(true); // elements don't count
+    expect(isReadyToBreed("Jawny", owns("Yeti", "Jawny"))).toBe(false); // already obtained
+    expect(isReadyToBreed("Muspel", owns("Volcano"))).toBe(true); // evolution source
+    expect(isReadyToBreed("Om", none)).toBe(true); // elements only
+    expect(isReadyToBreed("Kraka & Krummi", none)).toBe(false); // buy / clone only
+    expect(isReadyToBreed("Dancey", owns("Glitz"))).toBe(false);
   });
 });

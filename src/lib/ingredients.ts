@@ -25,18 +25,18 @@ export const isDragonItem = (item: RecipeItem): boolean => !item.includes(":");
 /** Display name: the dragon's `label` if it has one, otherwise its key. */
 export const labelOf = (name: string): string => DRAGONS[name]?.label ?? name;
 
-/** Short text for one recipe item, e.g. "fire", "any Treasure epic", "SCOURGE". */
+/** Short text for one recipe item, e.g. "fire", "any Treasure epic", "Zero". */
 export function ingredientText(item: RecipeItem): string {
   const ing = parseIngredient(item);
   switch (ing.kind) {
     case "element": return ing.element;
     case "epic": return `any ${ing.element} epic`;
     case "special": return `any ${ing.elementCount} different elements`;
-    case "dragon": return labelOf(ing.name).toUpperCase();
+    case "dragon": return labelOf(ing.name);
   }
 }
 
-/** One-line description of how to obtain a dragon, e.g. "MACABRE + SCOURGE". */
+/** One-line description of how to obtain a dragon, e.g. "Zero + Fulgurite". */
 export function howToObtainText(name: string): string {
   const d = DRAGONS[name];
   if (!d) return "";

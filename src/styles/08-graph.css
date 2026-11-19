@@ -1,0 +1,88 @@
+/* Graph view: canvas with find box, zoom buttons, key, and the details panel floating over it. */
+.graph{position:relative;height:max(520px,calc(100vh - 110px));scroll-margin-top:70px;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;
+  box-shadow:var(--shadow)}
+#gview{position:absolute;inset:0;touch-action:none;cursor:grab;
+  background-color:var(--bg-2);background-image:radial-gradient(rgba(170,205,255,.09) 1px,transparent 1.2px);background-size:24px 24px}
+#gview.dragging{cursor:grabbing}
+#gsvg{width:100%;height:100%;display:block}
+#gworld{transform-origin:0 0}
+#gworld.smooth{transition:transform .38s var(--ease)}
+#gstatus{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:var(--text-3);pointer-events:none}
+
+/* Floating controls */
+.gfind{position:absolute;top:14px;left:14px;width:min(300px,calc(100% - 28px))}
+.gfind input{width:100%;background:rgba(16,29,51,.92);backdrop-filter:blur(10px);box-shadow:0 8px 24px -10px rgba(0,0,0,.7)}
+.gzoom{position:absolute;right:14px;bottom:14px;display:flex;flex-direction:column;gap:6px;transition:right .3s var(--ease)}
+.gzoom .iconbtn{background:rgba(16,29,51,.92);backdrop-filter:blur(10px)}
+.gkey{position:absolute;left:14px;bottom:14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;max-width:calc(100% - 90px);
+  padding:8px 12px;border-radius:var(--radius);background:rgba(16,29,51,.88);backdrop-filter:blur(10px);border:1px solid var(--border);
+  font-size:12px;font-weight:600;color:var(--text-2);pointer-events:none}
+.gkey span{display:inline-flex;align-items:center;gap:7px}
+.gkey .k-breed{stroke:rgba(150,185,230,.6);stroke-width:2}
+.gkey .k-evolve{stroke:var(--good);stroke-width:2;stroke-dasharray:5 4}
+.gkey .k-target{display:inline-block;width:16px;height:11px;border-radius:4px;border:2px solid var(--accent)}
+.gkey .k-hint{color:var(--text-3)}
+
+/* Nodes */
+.gnode{cursor:pointer;transition:opacity .25s}
+.gnode rect.box{fill:var(--surface);stroke:var(--border-2);stroke-width:1.5;transition:stroke .15s,fill .15s}
+.gnode:hover rect.box{stroke:var(--text-3)}
+.gnode.target rect.box{stroke:var(--accent);stroke-width:2}
+.gnode.nomarket rect.box{fill:var(--bg-2);stroke-dasharray:5 4}
+.gnode.owned rect.box{fill:#10292d;stroke:var(--good);stroke-dasharray:none}
+.gnode.down rect.box{stroke:var(--down);stroke-width:2.5;stroke-dasharray:none}
+.gnode.sel rect.box{stroke:var(--accent);stroke-width:3.5;stroke-dasharray:none}
+.gnode rect.rframe{fill:rgba(255,255,255,.035);stroke:none}
+.gnode rect.rframe.r-rare{stroke:var(--r-rare);stroke-width:2;fill:rgba(74,140,255,.1)}
+.gnode rect.rframe.r-epic{stroke:var(--r-epic);stroke-width:2;fill:rgba(199,125,255,.11)}
+.gnode text{font-family:var(--font)}
+.gnode text.nm{fill:var(--text);font-size:15px;font-weight:800}
+.gnode text.pr{fill:var(--text-2);font-size:13px;font-weight:700}
+.gnode text.pr.none{fill:var(--text-3);font-weight:600}
+.gnode text.fl{fill:var(--text-3);font-size:12px;font-weight:600}
+.gown circle{fill:transparent;stroke:var(--border-2);stroke-width:1.5;transition:fill .15s,stroke .15s}
+.gown path{fill:none;stroke:transparent;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.gown:hover circle{stroke:var(--good)}
+.gown:hover path{stroke:var(--good)}
+.gown[aria-pressed="true"] circle{fill:var(--good);stroke:var(--good)}
+.gown[aria-pressed="true"] path{stroke:var(--good-ink)}
+
+/* Edges */
+.gedge{fill:none;stroke:rgba(150,185,230,.34);stroke-width:1.6;transition:opacity .25s,stroke .2s}
+.gedge.evolve{stroke:var(--good);stroke-dasharray:6 5;opacity:.75}
+.gedge.hl{stroke:var(--accent);stroke-width:2.6;opacity:1}
+.gedge.hl2{stroke:var(--down);stroke-width:2.6;stroke-dasharray:none;opacity:1}
+.gedge.evolve.hl{stroke:var(--good)}
+.dim{opacity:.13}
+
+/* Details panel */
+.gpanel{position:absolute;top:14px;right:14px;bottom:14px;width:320px;overflow-y:auto;padding:18px;
+  background:rgba(16,29,51,.95);backdrop-filter:blur(14px);border:1px solid var(--border-2);border-radius:16px;
+  box-shadow:0 18px 48px -18px rgba(0,0,0,.8);animation:panel-in .25s var(--ease)}
+@keyframes panel-in{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:none}}
+.graph.has-panel .gzoom{right:348px}
+.gp-close{position:absolute;top:12px;right:12px;width:32px;height:32px}
+.gp-head{display:grid;grid-template-columns:68px 1fr;gap:12px;align-items:center;padding-right:30px}
+.gp-head > img{width:68px;height:68px;object-fit:contain;border-radius:14px;background:rgba(255,255,255,.035)}
+.gp-head h3{margin:0 0 3px;font-size:19px;line-height:1.2}
+.gp-head .card-meta{margin-bottom:3px}
+.gp-facts{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.gp-facts p{margin:0;font-size:13px;color:var(--text-2)}
+.gp-facts p.muted{color:var(--text-3);font-size:12.5px}
+.gpanel h4{display:flex;align-items:center;gap:7px;margin:18px 0 8px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3)}
+.gpanel p.muted{margin:0;font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.need{background:var(--accent)}
+.dot.used{background:var(--down)}
+.gp-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.gp-actions .btn{flex:1 1 auto;justify-content:center}
+
+@media (max-width:799px){
+  .graph{height:auto;display:flex;flex-direction:column;overflow:visible;border:0;box-shadow:none}
+  #gview{position:relative;height:62vh;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+  .gfind{position:static;width:100%;order:-1;margin-bottom:10px}
+  .gzoom{bottom:auto;top:calc(62vh - 132px)}
+  .graph.has-panel .gzoom{right:14px}
+  .gkey{position:static;max-width:none;margin-top:10px;background:var(--surface)}
+  .gpanel{position:static;width:auto;margin-top:12px;animation:none}
+}

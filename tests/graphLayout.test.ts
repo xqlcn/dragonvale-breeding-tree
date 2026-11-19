@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { boundingBox, buildGraph, layoutGraph, NODE_HEIGHT, NODE_WIDTH } from "../src/components/graph/layout";
+import { boundingBox, buildGraph, layoutGraph, NODE_HEIGHT, NODE_WIDTH, roundedPath } from "../src/components/graph/layout";
 import { DEFAULT_FAVORITES, EVENT_DRAGONS } from "../src/data/targets";
 import { edgeHighlightClasses, focusSets, nodeHighlightClasses } from "../src/components/graph/focus";
 
@@ -19,7 +19,10 @@ describe("graph layout", () => {
     const layout = await layoutGraph(EVENT_DRAGONS);
     expect(Object.keys(layout.positions)).toHaveLength(135);
     expect(layout.edges).toHaveLength(114);
-    expect(layout.edges[0]?.path).toMatch(/^M[\d.]+,[\d.]+( L[\d.]+,[\d.]+)+$/);
+    const num = String.raw`-?[\d.]+`;
+    const pathRe = new RegExp(`^M${num},${num}( L${num},${num}| Q${num},${num} ${num},${num})+$`);
+    for (const e of layout.edges) expect(e.path).toMatch(pathRe);
+    expect(layout.edges.some((e) => e.path.includes(" Q"))).toBe(true); // bends are rounded
     expect(layout.width).toBeGreaterThan(NODE_WIDTH);
     const box = boundingBox(["Magni"], layout.positions);
     expect(box.w).toBe(NODE_WIDTH + 80);
@@ -39,5 +42,14 @@ describe("graph focus highlighting", () => {
     expect(edgeHighlightClasses("Zero", "Magni", sets)).toBe(" hl2");
     expect(edgeHighlightClasses("Lava", "Volcano", sets)).toBe(" dim");
     expect(focusSets("")).toBeNull();
+  });
+});
+
+describe("rounded edge paths", () => {
+  it("rounds each bend and keeps straight edges straight", () => {
+    expect(roundedPath([{ x: 0, y: 0 }, { x: 100, y: 0 }])).toBe("M0,0 L100,0");
+    expect(roundedPath([{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 100, y: 100 }])).toBe("M0,0 L90,0 Q100,0 100,10 L100,100");
+    // Short segments shrink the radius so curves never overshoot.
+    expect(roundedPath([{ x: 0, y: 0 }, { x: 8, y: 0 }, { x: 8, y: 50 }])).toBe("M0,0 L4,0 Q8,0 8,4 L8,50");
   });
 });

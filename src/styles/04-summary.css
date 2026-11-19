@@ -1,0 +1,49 @@
+/* Summary row (obtained, Iceberries still needed, ready to breed) and the sticky view bar. */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.sum-item{display:flex;flex-direction:column;gap:2px;padding:14px 18px;text-align:left;color:var(--text);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.sum-label{font-size:13px;font-weight:700;color:var(--text-2)}
+.sum-value{display:flex;align-items:center;font-size:26px;font-weight:800;line-height:1.25;font-variant-numeric:tabular-nums}
+.sum-value small{font-size:15px;font-weight:700;color:var(--text-3);margin-left:6px}
+.sum-value img.currency{height:20px;margin-right:7px}
+.sum-note{font-size:12.5px;color:var(--text-3)}
+.summary .bar{display:block;height:6px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.summary .bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--good));transition:width .45s var(--ease)}
+button.sum-ready{font:inherit;cursor:pointer;transition:border-color .15s,background .15s}
+button.sum-ready:not(:disabled) .sum-value{color:var(--good)}
+button.sum-ready:not(:disabled):hover{border-color:rgba(111,227,180,.5);background:linear-gradient(var(--good-soft),var(--good-soft)),var(--surface)}
+button.sum-ready:disabled{cursor:default}
+
+/* Sticky view bar */
+.viewbar{position:sticky;top:0;z-index:20;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  margin:20px -20px 18px;padding:10px 20px;background:rgba(10,19,34,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border)}
+.controls{flex:1 1 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px}
+.controls .search{flex:0 1 270px;min-width:180px}
+.controls .select{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--text-3)}
+.controls select{color:var(--text)}
+
+@media (max-width:720px){
+  .viewbar{position:static}
+  .controls{width:100%}
+  .controls .search{flex:1 1 100%}
+}
+
+@media (max-width:600px){
+  .summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .sum-item{padding:10px 12px;border-radius:14px}
+  .sum-label{font-size:11.5px;line-height:1.3}
+  .sum-value{font-size:19px}
+  .sum-value small{font-size:12px;margin-left:4px}
+  .sum-value img.currency{height:15px;margin-right:4px}
+  .sum-note,.summary .bar{display:none}
+  .controls{justify-content:flex-start}
+  .controls .select{flex:1 1 140px}
+  .controls .select select{flex:1;min-width:0}
+}
+
+/* Active "Ready to breed" filter, and the toolbar's Clear button. */
+button.sum-ready[aria-pressed="true"]{border-color:var(--good);background:linear-gradient(var(--good-soft),var(--good-soft)),var(--surface)}
+.clearbtn{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:var(--radius);border:1px solid var(--accent);
+  background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:13px;cursor:pointer}
+.clearbtn:hover{filter:brightness(1.15)}

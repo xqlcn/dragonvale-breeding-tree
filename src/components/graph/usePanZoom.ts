@@ -16,35 +16,43 @@ export function usePanZoom(viewRef: RefObject<HTMLElement | null>, worldRef: Ref
   const t = useRef({ k: 1, x: 0, y: 0 });
   const movedRef = useRef(false);
 
-  const apply = useCallback(() => {
+  /** Writes the transform; `smooth` animates it (fit / zoom buttons, never while dragging). */
+  const apply = useCallback((smooth = false) => {
     const { k, x, y } = t.current;
-    worldRef.current?.setAttribute("transform", `translate(${x},${y}) scale(${k})`);
+    const g = worldRef.current;
+    if (!g) return;
+    g.classList.toggle("smooth", smooth);
+    g.style.transform = `translate(${x}px,${y}px) scale(${k})`;
   }, [worldRef]);
 
-  const zoomAt = useCallback((factor: number, cx: number, cy: number) => {
+  const zoomAt = useCallback((factor: number, cx: number, cy: number, smooth = false) => {
     const s = t.current;
     const k = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, s.k * factor));
     const f = k / s.k;
     s.x = cx - (cx - s.x) * f;
     s.y = cy - (cy - s.y) * f;
     s.k = k;
-    apply();
+    apply(smooth);
   }, [apply]);
 
-  /** Zooms so `box` (world coordinates) fills the viewport. No-op while the viewport is hidden. */
-  const fit = useCallback((box: Box) => {
+  /**
+   * Zooms so `box` (world coordinates) fills the viewport, leaving `insetRight` px free on the right
+   * (where the details panel sits). Animated when `smooth`. No-op while the viewport is hidden.
+   */
+  const fit = useCallback((box: Box, insetRight = 0, smooth = false) => {
     const v = viewRef.current?.getBoundingClientRect();
     if (!v || !v.width) return;
+    const w = Math.max(v.width - insetRight, v.width * 0.4);
     const s = t.current;
-    s.k = Math.min(v.width / box.w, v.height / box.h, MAX_FIT_ZOOM) * 0.95;
-    s.x = (v.width - box.w * s.k) / 2 - box.x * s.k;
+    s.k = Math.min(w / box.w, v.height / box.h, MAX_FIT_ZOOM) * 0.95;
+    s.x = (w - box.w * s.k) / 2 - box.x * s.k;
     s.y = (v.height - box.h * s.k) / 2 - box.y * s.k;
-    apply();
+    apply(smooth);
   }, [viewRef, apply]);
 
   const zoomAtCenter = useCallback((factor: number) => {
     const r = viewRef.current?.getBoundingClientRect();
-    if (r) zoomAt(factor, r.width / 2, r.height / 2);
+    if (r) zoomAt(factor, r.width / 2, r.height / 2, true);
   }, [viewRef, zoomAt]);
 
   useEffect(() => {

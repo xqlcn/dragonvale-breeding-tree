@@ -1,19 +1,23 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
-import { usedBy } from "../../lib/breeding";
-import { labelOf } from "../../lib/ingredients";
 import { useObtained } from "../../state/ObtainedContext";
 import { useTargetList } from "../../state/TargetListContext";
+import { Icon } from "../common/Icon";
 import { edgeHighlightClasses, focusSets, nodeHighlightClasses } from "./focus";
-import { GraphLegend } from "./GraphLegend";
+import { GraphDetails } from "./GraphDetails";
 import { GraphNode } from "./GraphNode";
 import { GraphToolbar } from "./GraphToolbar";
 import { boundingBox, layoutGraph, type Box, type GraphLayout } from "./layout";
 import { usePanZoom } from "./usePanZoom";
 
+/** Width the details panel covers on wide screens (it stacks below the graph on narrow ones). */
+const PANEL_INSET = 340;
+const panelInset = (focus: string) =>
+  focus && typeof matchMedia === "function" && matchMedia("(min-width: 800px)").matches ? PANEL_INSET : 0;
+
 /**
- * "Breeding graph" tab for the active list. The layout is computed lazily while the tab is `active`,
- * once per distinct list (cached), and the graph stays mounted (just hidden) so pan/zoom/focus survive
- * tab switches.
+ * "Graph" view for the active list. The layout is computed lazily while the view is `active`, once per
+ * distinct list (cached), and stays mounted (just hidden) so pan / zoom / selection survive view switches.
+ * Clicking a dragon highlights what it needs and what it's used for, and opens its details panel.
  */
 export function GraphView({ active }: { active: boolean }) {
   const { isOwned, toggle } = useObtained();
@@ -33,7 +37,7 @@ export function GraphView({ active }: { active: boolean }) {
   // Lay out the (code-split) ELK graph for this list the first time it's shown; results are cached per list.
   useEffect(() => {
     if (!active || layouts.has(listKey)) return;
-    if (!targets.length) { setStatus("Your list is empty. Switch to “All event dragons” and press ☆ on a card to add dragons."); return; }
+    if (!targets.length) { setStatus("Your list is empty. Use Edit list to add dragons."); return; }
     let cancelled = false;
     setStatus("Laying out graph…");
     layoutGraph(targets).then(
@@ -43,32 +47,32 @@ export function GraphView({ active }: { active: boolean }) {
     return () => { cancelled = true; };
   }, [active, listKey, targets, layouts]);
 
-  // Drop the highlight when its dragon isn't in the current list's graph.
+  // Drop the selection when its dragon isn't in the current list's graph.
   useEffect(() => {
     if (layout && focus && !layout.nodes.includes(focus)) setFocus("");
   }, [layout, focus]);
 
   const targetSet = useMemo(() => new Set(targets), [targets]);
-
   const fullBox = useCallback((l: GraphLayout): Box => ({ x: 0, y: 0, w: l.width, h: l.height }), []);
 
-  /** Sets (or clears) the focused dragon; `zoom` also frames everything related to it. */
-  const focusOn = useCallback((name: string, zoom = false) => {
+  /** Selects (or clears) a dragon and frames it with everything related to it. */
+  const focusOn = useCallback((name: string) => {
     setFocus(name);
+    if (!layout) return;
     const sets = focusSets(name);
-    if (zoom && sets && layout) fit(boundingBox(sets.related, layout.positions));
-  }, [fit, layout]);
+    fit(sets ? boundingBox(sets.related, layout.positions) : fullBox(layout), panelInset(name), true);
+  }, [fit, layout, fullBox]);
 
-  /** Fit button / window resize: frame the focused subgraph, or the whole graph. */
+  /** Fit button / window resize: frame the selection, or the whole graph. */
   const refit = useCallback(() => {
     if (!layout) return;
-    if (focusRef.current) focusOn(focusRef.current, true);
-    else fit(fullBox(layout));
-  }, [layout, focusOn, fit, fullBox]);
+    const sets = focusSets(focusRef.current);
+    fit(sets ? boundingBox(sets.related, layout.positions) : fullBox(layout), panelInset(focusRef.current), true);
+  }, [layout, fit, fullBox]);
 
-  // Fit the whole graph when it first appears and every time the tab is re-opened.
+  // Fit the whole graph when it first appears and every time the view is re-opened.
   useLayoutEffect(() => {
-    if (active && layout) fit(fullBox(layout));
+    if (active && layout) fit(fullBox(layout), panelInset(focusRef.current));
   }, [active, layout, fit, fullBox]);
 
   useEffect(() => {
@@ -92,23 +96,12 @@ export function GraphView({ active }: { active: boolean }) {
   const sets = useMemo(() => focusSets(focus), [focus]);
 
   return (
-    <>
-      <GraphToolbar
-        nodes={layout?.nodes ?? null}
-        targets={targets}
-        focus={focus}
-        onFocusChange={(n) => focusOn(n, true)}
-        onZoomIn={() => zoomAtCenter(1.25)}
-        onZoomOut={() => zoomAtCenter(0.8)}
-        onFit={refit}
-      />
-      <GraphLegend />
-      <div id="ginfo">{layout && <FocusInfo focus={focus} nodes={layout.nodes} />}</div>
-      <div id="gview" ref={viewRef} onClick={() => { if (!movedRef.current && layout) focusOn(""); }}>
+    <div className={"graph" + (focus ? " has-panel" : "")}>
+      <div id="gview" ref={viewRef} onClick={() => { if (!movedRef.current && layout && focus) focusOn(""); }}>
         <svg id="gsvg">
           <defs>
-            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 z" fill="context-stroke" />
+            <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="context-stroke" />
             </marker>
           </defs>
           <g id="gworld" ref={worldRef}>
@@ -151,21 +144,23 @@ export function GraphView({ active }: { active: boolean }) {
         </svg>
         {!layout && <div id="gstatus">{status}</div>}
       </div>
-    </>
-  );
-}
 
-function FocusInfo({ focus, nodes }: { focus: string; nodes: readonly string[] }) {
-  if (!focus) return null;
-  const used = usedBy(focus).filter((n) => nodes.includes(n)).map(labelOf);
-  return (
-    <>
-      <b>{labelOf(focus)}</b>: <span style={{ color: "var(--accent)" }}>cyan</span> = what you need to breed it
-      {used.length ? (
-        <> · <span style={{ color: "var(--down)" }}>pink</span> = what it's used for (directly: {used.join(", ")})</>
-      ) : (
-        " · not used to breed any other dragon here"
+      <GraphToolbar nodes={layout?.nodes ?? null} focus={focus} onFocusChange={focusOn} />
+      <div className="gzoom" role="group" aria-label="Zoom">
+        <button type="button" className="iconbtn" id="gzin" aria-label="Zoom in" title="Zoom in" onClick={() => zoomAtCenter(1.25)}><Icon name="plus" /></button>
+        <button type="button" className="iconbtn" id="gzout" aria-label="Zoom out" title="Zoom out" onClick={() => zoomAtCenter(0.8)}><Icon name="minus" /></button>
+        <button type="button" className="iconbtn" id="gfit" aria-label="Fit to screen" title="Fit to screen" onClick={refit}><Icon name="fit" /></button>
+      </div>
+      <div className="gkey" aria-hidden="true">
+        <span><svg width="26" height="8"><path d="M1,4 H25" className="k-breed" /></svg>breeds into</span>
+        <span><svg width="26" height="8"><path d="M1,4 H25" className="k-evolve" /></svg>evolves into</span>
+        <span><i className="k-target" />on your list</span>
+        {!focus && <span className="k-hint">Click a dragon for details</span>}
+      </div>
+
+      {focus && layout && (
+        <GraphDetails name={focus} nodes={layout.nodes} onFocus={focusOn} onClose={() => focusOn("")} />
       )}
-    </>
+    </div>
   );
 }

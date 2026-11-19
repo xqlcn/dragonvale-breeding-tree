@@ -1,0 +1,6 @@
+/* Print: light background, no sticky bar or interactive chrome. */
+@media print{
+  body{background:#fff;color:#000}
+  .viewbar,.top-actions,.foot-actions,.card-actions,.keyparents{display:none}
+  .card,.sum-item,.tablewrap{background:#fff;border-color:#ccc;box-shadow:none;break-inside:avoid}
+}
