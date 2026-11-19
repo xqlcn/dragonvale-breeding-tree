@@ -13,6 +13,8 @@ interface Props {
   owned: boolean;
   /** On the active list (accent border). */
   target: boolean;
+  /** Can be bred right now (every parent obtained): shows a READY tag. */
+  ready: boolean;
   /** Extra classes from the current focus highlight (" dim", " sel", " down"). */
   highlight: string;
   onSelect: (name: string, e: MouseEvent) => void;
@@ -23,7 +25,7 @@ const TEXT_X = 84;
 const FLAG_STEP = 20;
 
 /** One dragon box in the breeding graph. Details live in the side panel, so the box stays minimal. */
-export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, highlight, onSelect, onToggleOwned }: Props) {
+export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, ready, highlight, onSelect, onToggleOwned }: Props) {
   const d = DRAGONS[name] ?? {};
   const [spriteFailed, setSpriteFailed] = useState(false);
   const kind = target ? "target" : d.price ? "market" : "nomarket";
@@ -32,7 +34,7 @@ export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, hi
 
   return (
     <g
-      className={`gnode ${kind}${owned ? " owned" : ""}${highlight}`}
+      className={`gnode ${kind}${owned ? " owned" : ""}${ready ? " ready" : ""}${highlight}`}
       transform={`translate(${x},${y})`}
       data-n={name}
       onClick={(e) => onSelect(name, e)}
@@ -46,6 +48,13 @@ export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, hi
         preserveAspectRatio="xMidYMid meet"
         onError={() => setSpriteFailed(true)}
       />
+      {ready && (
+        <g className="rtag">
+          <title>Ready to breed: every parent obtained</title>
+          <rect x={14} y={64} width={54} height={16} rx={8} />
+          <text x={41} y={75.5} textAnchor="middle">READY</text>
+        </g>
+      )}
       <text className="nm" x={TEXT_X} y={30}>{labelOf(name)}</text>
       {d.price ? (
         <>

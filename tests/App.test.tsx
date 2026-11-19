@@ -220,6 +220,68 @@ describe("Graph view", () => {
     expect(document.getElementById("gpanel")).toHaveTextContent("Yeti");
     expect(document.querySelector('.gnode[data-n="Yeti"]')).toHaveClass("sel");
   }, 20_000);
+
+  it("clearing a selection glides back to the view from before the first click", async () => {
+    const user = userEvent.setup();
+    history.replaceState(null, "", "/#graph");
+    render(<App />);
+    // jsdom has no layout: give the viewport a size so fitting / zooming produce real transforms.
+    const gview = document.getElementById("gview")!;
+    gview.getBoundingClientRect = () => ({ x: 0, y: 0, top: 0, left: 0, right: 1000, bottom: 600, width: 1000, height: 600, toJSON: () => ({}) });
+    await screen.findAllByText("Zero", { selector: ".gnode text" }, { timeout: 15_000 });
+    const transform = () => (document.getElementById("gworld") as unknown as SVGGElement).style.transform;
+
+    await user.click(document.getElementById("gzin")!); // the user's own view: zoomed in a bit
+    const before = transform();
+
+    await user.click(document.querySelector('.gnode[data-n="Zero"] rect.box')!);
+    expect(transform()).not.toBe(before); // framed Zero
+    await user.click(within(document.getElementById("gpanel")!).getByRole("button", { name: "Magni" }));
+    expect(document.getElementById("gpanel")).toHaveTextContent("Magni");
+
+    await user.click(gview); // click out
+    expect(document.getElementById("gpanel")).toBeNull();
+    expect(transform()).toBe(before);
+
+    // Same with the panel's close button.
+    await user.click(document.querySelector('.gnode[data-n="Zero"] rect.box')!);
+    expect(transform()).not.toBe(before);
+    await user.click(screen.getByLabelText("Close details"));
+    expect(transform()).toBe(before);
+  }, 20_000);
+
+  it("tags dragons you can breed now, and the Ready to breed button spotlights them", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem(OBTAINED_STORAGE_KEY, '["Yeti"]');
+    history.replaceState(null, "", "/#graph");
+    render(<App />);
+    await screen.findAllByText("Jawny", { selector: ".gnode text" }, { timeout: 15_000 });
+    const node = (n: string) => document.querySelector(`.gnode[data-n="${n}"]`)!;
+    expect(node("Jawny")).toHaveClass("ready");
+    expect(node("Jawny").querySelector(".rtag")).toHaveTextContent("READY");
+    expect(node("Yeti")).not.toHaveClass("ready"); // already obtained
+    expect(node("Magni")).not.toHaveClass("ready");
+    expect(node("Magni")).not.toHaveClass("dim");
+
+    const button = document.getElementById("gready")!;
+    await user.click(button);
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(document.getElementById("sum-ready")).toHaveAttribute("aria-pressed", "true"); // one shared switch
+    expect(node("Jawny")).not.toHaveClass("dim");
+    expect(node("Yeti")).not.toHaveClass("dim"); // the parent that makes it ready stays lit
+    expect(node("Magni")).toHaveClass("dim");
+    expect(document.querySelector('.gedge[data-s="Yeti"][data-t="Jawny"]')).toHaveClass("rdy");
+
+    // Selecting a dragon takes over from the spotlight.
+    await user.click(node("Magni").querySelector("rect.box")!);
+    expect(node("Magni")).toHaveClass("sel");
+    expect(node("Magni")).not.toHaveClass("dim");
+
+    // The summary card turns it off again, from the graph too.
+    await user.click(document.getElementById("sum-ready")!);
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    expect(location.hash).toBe("#graph");
+  }, 20_000);
 });
 
 describe("My list vs all dragons", () => {

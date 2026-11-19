@@ -25,3 +25,19 @@ export function edgeHighlightClasses(source: string, target: string, sets: Focus
   const down = sets.downstream.has(source) && sets.downstream.has(target);
   return (up ? " hl" : "") + (down ? " hl2" : "") + (!up && !down ? " dim" : "");
 }
+
+/**
+ * "Ready to breed" spotlight, used while no dragon is selected: ready dragons and their direct parents
+ * (which you own, by definition) stay lit, everything else is dimmed.
+ */
+export interface ReadySets { ready: ReadonlySet<string>; parents: ReadonlySet<string> }
+
+export function readyNodeClasses(name: string, sets: ReadySets | null): string {
+  if (!sets) return "";
+  return sets.ready.has(name) || sets.parents.has(name) ? "" : " dim";
+}
+
+export function readyEdgeClasses(target: string, sets: ReadySets | null): string {
+  if (!sets) return "";
+  return sets.ready.has(target) ? " rdy" : " dim";
+}

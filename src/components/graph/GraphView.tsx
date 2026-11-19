@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { useObtained } from "../../state/ObtainedContext";
+import { dragonRequirementsOf } from "../../lib/breeding";
+import { isReadyToBreed } from "../../lib/targetList";
 import { useTargetList } from "../../state/TargetListContext";
 import { Icon } from "../common/Icon";
-import { edgeHighlightClasses, focusSets, nodeHighlightClasses } from "./focus";
+import {
+  edgeHighlightClasses, focusSets, nodeHighlightClasses, readyEdgeClasses, readyNodeClasses, type ReadySets,
+} from "./focus";
 import { GraphDetails } from "./GraphDetails";
 import { GraphNode } from "./GraphNode";
 import { GraphToolbar } from "./GraphToolbar";
 import { boundingBox, layoutGraph, type Box, type GraphLayout } from "./layout";
-import { usePanZoom } from "./usePanZoom";
+import { usePanZoom, type View } from "./usePanZoom";
 
 /** Width the details panel covers on wide screens (it stacks below the graph on narrow ones). */
 const PANEL_INSET = 340;
@@ -19,7 +23,14 @@ const panelInset = (focus: string) =>
  * distinct list (cached), and stays mounted (just hidden) so pan / zoom / selection survive view switches.
  * Clicking a dragon highlights what it needs and what it's used for, and opens its details panel.
  */
-export function GraphView({ active }: { active: boolean }) {
+interface Props {
+  active: boolean;
+  /** "Ready to breed" spotlight on (shared with the Show filter of the other views). */
+  readyOnly: boolean;
+  onToggleReady: () => void;
+}
+
+export function GraphView({ active, readyOnly, onToggleReady }: Props) {
   const { isOwned, toggle } = useObtained();
   const { targets } = useTargetList();
   const listKey = targets.join("|");
@@ -32,7 +43,9 @@ export function GraphView({ active }: { active: boolean }) {
 
   const viewRef = useRef<HTMLDivElement>(null);
   const worldRef = useRef<SVGGElement>(null);
-  const { fit, zoomAtCenter, movedRef } = usePanZoom(viewRef, worldRef);
+  const { fit, zoomAtCenter, movedRef, getView, setView } = usePanZoom(viewRef, worldRef);
+  /** Pan / zoom from just before the first dragon was selected; restored when the selection is cleared. */
+  const viewBeforeFocus = useRef<View | null>(null);
 
   // Lay out the (code-split) ELK graph for this list the first time it's shown; results are cached per list.
   useEffect(() => {
@@ -55,13 +68,24 @@ export function GraphView({ active }: { active: boolean }) {
   const targetSet = useMemo(() => new Set(targets), [targets]);
   const fullBox = useCallback((l: GraphLayout): Box => ({ x: 0, y: 0, w: l.width, h: l.height }), []);
 
-  /** Selects (or clears) a dragon and frames it with everything related to it. */
+  /**
+   * Selects a dragon and frames it with everything related to it, or clears the selection. The view from
+   * before the first selection is remembered (moving between dragons keeps it), and clearing glides back there.
+   */
   const focusOn = useCallback((name: string) => {
+    const previous = focusRef.current;
     setFocus(name);
     if (!layout) return;
-    const sets = focusSets(name);
-    fit(sets ? boundingBox(sets.related, layout.positions) : fullBox(layout), panelInset(name), true);
-  }, [fit, layout, fullBox]);
+    if (name) {
+      if (!previous) viewBeforeFocus.current = getView();
+      fit(boundingBox(focusSets(name)!.related, layout.positions), panelInset(name), true);
+    } else if (viewBeforeFocus.current) {
+      setView(viewBeforeFocus.current, true);
+      viewBeforeFocus.current = null;
+    } else {
+      fit(fullBox(layout), 0, true);
+    }
+  }, [fit, getView, setView, layout, fullBox]);
 
   /** Fit button / window resize: frame the selection, or the whole graph. */
   const refit = useCallback(() => {
@@ -71,8 +95,11 @@ export function GraphView({ active }: { active: boolean }) {
   }, [layout, fit, fullBox]);
 
   // Fit the whole graph when it first appears and every time the view is re-opened.
+  // That replaces the view, so there's no earlier one to go back to any more.
   useLayoutEffect(() => {
-    if (active && layout) fit(fullBox(layout), panelInset(focusRef.current));
+    if (!active || !layout) return;
+    viewBeforeFocus.current = null;
+    fit(fullBox(layout), panelInset(focusRef.current));
   }, [active, layout, fit, fullBox]);
 
   useEffect(() => {
@@ -95,6 +122,17 @@ export function GraphView({ active }: { active: boolean }) {
 
   const sets = useMemo(() => focusSets(focus), [focus]);
 
+  // Dragons in this graph that can be bred now, and the (owned) parents feeding them.
+  const readyNodes = useMemo(
+    () => new Set((layout?.nodes ?? []).filter((n) => isReadyToBreed(n, isOwned))),
+    [layout, isOwned],
+  );
+  // A selected dragon's highlight takes priority over the spotlight.
+  const readySets = useMemo<ReadySets | null>(
+    () => (readyOnly && !focus ? { ready: readyNodes, parents: new Set([...readyNodes].flatMap(dragonRequirementsOf)) } : null),
+    [readyOnly, focus, readyNodes],
+  );
+
   return (
     <div className={"graph" + (focus ? " has-panel" : "")}>
       <div id="gview" ref={viewRef} onClick={() => { if (!movedRef.current && layout && focus) focusOn(""); }}>
@@ -112,7 +150,7 @@ export function GraphView({ active }: { active: boolean }) {
                     <path
                       key={e.id}
                       d={e.path}
-                      className={"gedge" + (e.evolve ? " evolve" : "") + edgeHighlightClasses(e.source, e.target, sets)}
+                      className={"gedge" + (e.evolve ? " evolve" : "") + edgeHighlightClasses(e.source, e.target, sets) + readyEdgeClasses(e.target, readySets)}
                       markerEnd="url(#arr)"
                       data-s={e.source}
                       data-t={e.target}
@@ -131,7 +169,8 @@ export function GraphView({ active }: { active: boolean }) {
                         y={p.y}
                         owned={isOwned(n)}
                         target={targetSet.has(n)}
-                        highlight={nodeHighlightClasses(n, focus, sets)}
+                        ready={readyNodes.has(n)}
+                        highlight={nodeHighlightClasses(n, focus, sets) + readyNodeClasses(n, readySets)}
                         onSelect={onSelectNode}
                         onToggleOwned={onToggleOwned}
                       />
@@ -146,6 +185,12 @@ export function GraphView({ active }: { active: boolean }) {
       </div>
 
       <GraphToolbar nodes={layout?.nodes ?? null} focus={focus} onFocusChange={focusOn} />
+      <button
+        type="button" className="readybtn" id="gready" aria-pressed={readyOnly} onClick={onToggleReady}
+        title={readyOnly ? "Show every dragon again" : "Highlight the dragons you can breed right now"}
+      >
+        <span className="rdot" /> Ready to breed <span className="count">{readyNodes.size}</span>
+      </button>
       <div className="gzoom" role="group" aria-label="Zoom">
         <button type="button" className="iconbtn" id="gzin" aria-label="Zoom in" title="Zoom in" onClick={() => zoomAtCenter(1.25)}><Icon name="plus" /></button>
         <button type="button" className="iconbtn" id="gzout" aria-label="Zoom out" title="Zoom out" onClick={() => zoomAtCenter(0.8)}><Icon name="minus" /></button>
@@ -155,6 +200,7 @@ export function GraphView({ active }: { active: boolean }) {
         <span><svg width="26" height="8"><path d="M1,4 H25" className="k-breed" /></svg>breeds into</span>
         <span><svg width="26" height="8"><path d="M1,4 H25" className="k-evolve" /></svg>evolves into</span>
         <span><i className="k-target" />on your list</span>
+        <span><i className="k-ready">READY</i>can breed now</span>
         {!focus && <span className="k-hint">Click a dragon for details</span>}
       </div>
 

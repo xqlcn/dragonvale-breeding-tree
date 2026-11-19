@@ -1,7 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { boundingBox, buildGraph, layoutGraph, NODE_HEIGHT, NODE_WIDTH, roundedPath } from "../src/components/graph/layout";
 import { DEFAULT_FAVORITES, EVENT_DRAGONS } from "../src/data/targets";
-import { edgeHighlightClasses, focusSets, nodeHighlightClasses } from "../src/components/graph/focus";
+import {
+  edgeHighlightClasses, focusSets, nodeHighlightClasses, readyEdgeClasses, readyNodeClasses,
+} from "../src/components/graph/focus";
+
+describe("ready-to-breed spotlight", () => {
+  it("keeps ready dragons and their parents lit, dims the rest", () => {
+    const sets = { ready: new Set(["Jawny"]), parents: new Set(["Yeti"]) };
+    expect(readyNodeClasses("Jawny", sets)).toBe("");
+    expect(readyNodeClasses("Yeti", sets)).toBe("");
+    expect(readyNodeClasses("Magni", sets)).toBe(" dim");
+    expect(readyEdgeClasses("Jawny", sets)).toBe(" rdy");
+    expect(readyEdgeClasses("Magni", sets)).toBe(" dim");
+    expect(readyNodeClasses("Magni", null)).toBe("");
+    expect(readyEdgeClasses("Magni", null)).toBe("");
+  });
+});
 
 describe("graph layout", () => {
   it("builds one edge per specific ingredient, flagging evolutions", () => {

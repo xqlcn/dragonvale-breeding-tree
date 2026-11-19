@@ -86,3 +86,21 @@
   .gkey{position:static;max-width:none;margin-top:10px;background:var(--surface)}
   .gpanel{position:static;width:auto;margin-top:12px;animation:none}
 }
+
+/* "Ready to breed": READY tag on nodes, the toggle button, and lit edges while the spotlight is on. */
+.rtag rect{fill:var(--good);stroke:var(--bg-2);stroke-width:2}
+.rtag text{fill:var(--good-ink);font:800 9.5px var(--font);letter-spacing:.06em}
+.gedge.rdy{stroke:var(--good);stroke-width:2.2;opacity:.9}
+.readybtn{position:absolute;top:14px;left:calc(min(300px,100% - 28px) + 24px);display:inline-flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border-2);background:rgba(16,29,51,.92);backdrop-filter:blur(10px);
+  color:var(--text);font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 8px 24px -10px rgba(0,0,0,.7);transition:border-color .15s,background .15s}
+.readybtn:hover{border-color:var(--good)}
+.readybtn[aria-pressed="true"]{border-color:var(--good);background:rgba(18,52,52,.95);color:var(--good)}
+.readybtn .rdot{width:9px;height:9px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px var(--good-soft)}
+.readybtn .count{font-size:12px;color:var(--text-3);background:rgba(255,255,255,.07);padding:0 7px;border-radius:99px}
+.readybtn[aria-pressed="true"] .count{color:var(--good);background:var(--good-soft)}
+.gkey .k-ready{display:inline-block;padding:0 6px;border-radius:8px;background:var(--good);color:var(--good-ink);font:800 9px/15px var(--font);font-style:normal;letter-spacing:.06em}
+
+@media (max-width:799px){
+  .readybtn{position:static;order:-1;align-self:flex-start;margin-bottom:10px}
+}

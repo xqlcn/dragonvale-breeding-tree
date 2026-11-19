@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, type RefObject } from "react";
 import type { Box, Point } from "./layout";
 
+/** Pan (x, y) and zoom (k) of the graph world. */
+export interface View { k: number; x: number; y: number }
+
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 3;
 const MAX_FIT_ZOOM = 1.4;
@@ -13,7 +16,7 @@ const DRAG_THRESHOLD = 4;
  * drag, so click handlers can ignore the click that ends a pan.
  */
 export function usePanZoom(viewRef: RefObject<HTMLElement | null>, worldRef: RefObject<SVGGElement | null>) {
-  const t = useRef({ k: 1, x: 0, y: 0 });
+  const t = useRef<View>({ k: 1, x: 0, y: 0 });
   const movedRef = useRef(false);
 
   /** Writes the transform; `smooth` animates it (fit / zoom buttons, never while dragging). */
@@ -24,6 +27,13 @@ export function usePanZoom(viewRef: RefObject<HTMLElement | null>, worldRef: Ref
     g.classList.toggle("smooth", smooth);
     g.style.transform = `translate(${x}px,${y}px) scale(${k})`;
   }, [worldRef]);
+
+  /** The current pan / zoom, to restore later with `setView`. */
+  const getView = useCallback((): View => ({ ...t.current }), []);
+  const setView = useCallback((v: View, smooth = false) => {
+    t.current = { ...v };
+    apply(smooth);
+  }, [apply]);
 
   const zoomAt = useCallback((factor: number, cx: number, cy: number, smooth = false) => {
     const s = t.current;
@@ -121,5 +131,5 @@ export function usePanZoom(viewRef: RefObject<HTMLElement | null>, worldRef: Ref
     };
   }, [viewRef, zoomAt, apply]);
 
-  return { fit, zoomAtCenter, movedRef };
+  return { fit, zoomAtCenter, movedRef, getView, setView };
 }

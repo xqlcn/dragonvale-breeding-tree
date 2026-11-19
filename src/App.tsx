@@ -20,13 +20,12 @@ export function App() {
     if (patch.adultSprites !== undefined) saveAdultSprites(patch.adultSprites);
     setControls((c) => ({ ...c, ...patch }));
   }, []);
-  /** The "Ready to breed" summary card toggles that filter (and leaves the graph for the cards). */
-  const readyActive = controls.show === "ready" && tab !== "graph";
-  const toggleReady = () => {
-    if (readyActive) return update({ show: "all" });
-    update({ show: "ready", query: "" });
-    if (tab === "graph") setTab("trees");
-  };
+  /**
+   * "Ready to breed" is one switch shared by every view: the Show filter in Trees / Table, the spotlight in
+   * the graph. The summary card and the graph's button both toggle it.
+   */
+  const readyActive = controls.show === "ready";
+  const toggleReady = () => update(readyActive ? { show: "all" } : { show: "ready", query: "" });
 
   return (
     <ObtainedProvider>
@@ -46,7 +45,7 @@ export function App() {
             </section>
           </SpriteStageContext.Provider>
           <section id="view-graph" role="tabpanel" aria-labelledby="tab-graph" hidden={tab !== "graph"}>
-            <GraphView active={tab === "graph"} />
+            <GraphView active={tab === "graph"} readyOnly={readyActive} onToggleReady={toggleReady} />
           </section>
         </main>
         <Footer />
