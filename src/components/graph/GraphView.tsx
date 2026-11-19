@@ -160,9 +160,9 @@ function FocusInfo({ focus, nodes }: { focus: string; nodes: readonly string[] }
   const used = usedBy(focus).filter((n) => nodes.includes(n)).map(labelOf);
   return (
     <>
-      <b>{labelOf(focus)}</b>: <span style={{ color: "var(--accent)" }}>orange</span> = what you need to breed it
+      <b>{labelOf(focus)}</b>: <span style={{ color: "var(--accent)" }}>cyan</span> = what you need to breed it
       {used.length ? (
-        <> · <span style={{ color: "var(--cold)" }}>blue</span> = what it's used for (directly: {used.join(", ")})</>
+        <> · <span style={{ color: "var(--down)" }}>pink</span> = what it's used for (directly: {used.join(", ")})</>
       ) : (
         " · not used to breed any other dragon here"
       )}

@@ -1,9 +1,9 @@
-import { formatCandy } from "../../lib/format";
+import { formatAmount } from "../../lib/format";
 import { labelOf } from "../../lib/ingredients";
 import { cheapestTarget, mostExpensiveTarget, priceOf, remainingTargetPrice, totalTargetPrice } from "../../lib/pricing";
 import { useObtained } from "../../state/ObtainedContext";
 import { useTargetList } from "../../state/TargetListContext";
-import { CandyAmount } from "../common/CandyAmount";
+import { CurrencyAmount } from "../common/CurrencyAmount";
 
 /** Progress + headline price tiles for the active list. */
 export function StatsBar() {
@@ -17,16 +17,16 @@ export function StatsBar() {
     <div className="stats" id="stats">
       <div className="stat"><b style={{ color: "var(--good)" }}>{haveCount} / {targets.length}</b><small>obtained</small></div>
       <div className="stat">
-        <b><CandyAmount amount={remainingTargetPrice(targets, owned)} /></b>
-        <small>to buy the rest{haveCount ? ` (of ${formatCandy(total)})` : ""}</small>
+        <b><CurrencyAmount amount={remainingTargetPrice(targets, owned)} /></b>
+        <small>to buy the rest{haveCount ? ` (of ${formatAmount(total)})` : ""}</small>
       </div>
       <div className="stat">
         <b>{maxName ?? "—"}</b>
-        <small>most expensive{maxName && <> (<CandyAmount amount={priceOf(maxName)} />)</>}</small>
+        <small>most expensive{maxName && <> (<CurrencyAmount amount={priceOf(maxName)} />)</>}</small>
       </div>
       <div className="stat">
         <b>{minName ? labelOf(minName) : "—"}</b>
-        <small>cheapest{minName && <> (<CandyAmount amount={priceOf(minName)} />)</>}</small>
+        <small>cheapest{minName && <> (<CurrencyAmount amount={priceOf(minName)} />)</>}</small>
       </div>
     </div>
   );

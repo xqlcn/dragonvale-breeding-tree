@@ -11,9 +11,10 @@ export const GraphLegend = () => (
       <svg width="34" height="10"><line x1="0" y1="5" x2="34" y2="5" stroke="var(--good)" strokeWidth="2" strokeDasharray="5 4" /></svg>evolves into
     </span>
     <span><i className="sw" style={{ borderColor: "var(--accent)" }}></i>When highlighting: needed to breed it</span>
-    <span><i className="sw" style={{ borderColor: "var(--cold)" }}></i>When highlighting: uses it</span>
+    <span><i className="sw" style={{ borderColor: "var(--down)" }}></i>When highlighting: uses it</span>
     <span><i className="sw" style={{ borderColor: "var(--good)" }}></i>Obtained (click the ✓ circle on a box)</span>
+    <span><i className="rkey r-rare"></i>rare · <i className="rkey r-epic"></i>epic (frame around the sprite)</span>
     <span>Flags inside a box = the extra elements its combo needs</span>
-    <span>Drag to pan · scroll / pinch to zoom · click a box to highlight what it needs (orange) and what needs it (blue)</span>
+    <span>Drag to pan · scroll / pinch to zoom · click a box to highlight what it needs (cyan) and what needs it (pink)</span>
   </div>
 );

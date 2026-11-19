@@ -1,32 +1,52 @@
+/** One section of the event market, as the game groups it. */
+export interface MarketSection {
+  name: string;
+  dragons: readonly string[];
+}
+
 /**
- * Every dragon sold in the event market: the "All event dragons" list, in its list order.
- * Each must be priced in `DRAGONS`. The original 23-dragon list comes first, then the rest in market order.
+ * Every dragon sold in the event market, by market section and in market order.
+ * Each must be priced in `DRAGONS`. Pedestals and decorations are left out.
  */
-export const EVENT_DRAGONS: readonly string[] = [
-  "Reaper", "Awoo", "Yaga", "Bruntal", "Dracomancy", "Kwall", "Infernus", "Vampir",
-  "Fury", "Nightmare", "Spirit", "Wendigo", "Nox", "Corrupticorn", "Umbra", "Punk",
-  "Kage", "Hydnellum", "Fortified", "Exterrean", "Charlatan", "Barbarous", "Macabre",
-  // Limited
-  "Torment", "Eggony", "Hollowjaw",
-  // Otherworldly
-  "Mirhor", "Tartarus", "Sinking", "Brainiac", "Righteous", "Pit", "Dumi", "Dragpir", "Spooker",
-  "Drack-o-Lantern", "Candycorn", "Bone", "Thicket", "Love", "Ghost", "Dracabra", "Oni", "Spectre",
-  "Nether", "Nosferatu", "Bog", "Misfortune", "Ambrosia", "Delight", "Midnight", "Gatren", "Malefice",
-  "Maw", "Scout", "Etch", "Narcis", "Funis", "Combustion", "Grimoire", "Dortal", "Magma", "Shackle",
-  "Omen", "Eww",
-  // Ominous
-  "Valor", "Gourd", "Cerberus", "Decay", "Lycan", "Nesting", "Zombie", "Chromacorn", "Porcelain",
-  "Plumpkin", "Ocular", "Wrath", "Iden", "Hyperion", "Heavy Metal", "Techno", "Brood", "Rotblossom",
-  "Amalgamate", "Greymatter", "Machina", "Tickles",
-  // Summons
-  "Eldritch", "Scourge",
-  // Haunted
-  "Ghostly Plant", "Ghostly Fire", "Ghostly Earth", "Ghostly Cold", "Ghostly Lava", "Ghostly Obsidian",
-  "Ghostly Mountain", "Ghostly Glacier", "Ghostly Nosferatu", "Ghostly Bone", "Ghostly Decay",
-  "Ghostly Oni", "Ghostly Spectre", "Ghostly Spirit", "Ghostly Ghost",
-  // Tricks & Treats
-  "Trick", "Ortreat",
+export const EVENT_SECTIONS: readonly MarketSection[] = [
+  { name: "Limited", dragons: ["Magni", "Muspel", "Kraka & Krummi"] },
+  {
+    name: "Branching",
+    dragons: [
+      "Fubuki", "Drak-E", "Onsen", "Jawny", "Kitse", "Iceere", "Om", "Thaw",
+      "Reindeer", "Gift", "Coal", "Trinket", "Regift", "Mistletoe", "Holly",
+      "Snowflake 1", "Snowflake 2", "Snowflake 3", "Snowflake 4", "Snowflake 5", "Snowflake 6", "Snowflake 7",
+      "Sleighbell", "Candlecrown", "Snowpocalypse", "Jingle", "Eve", "Tusk", "Shiver", "Festive", "Chaiko",
+      "Grandeur", "Icecarade", "Shaper", "Snopaw", "Gingerbread", "Eaves", "Tectonic", "Iceclaw",
+      "Flamegobbler", "Pyros & Glacius", "Earthcore", "Volcano",
+    ],
+  },
+  {
+    name: "Wisdom",
+    dragons: [
+      "Ornamental", "Winter", "Nibwhip", "Burglehoo", "Libretto", "Gulletail", "Sugarplum", "Avarice",
+      "Trepak", "Lokilure", "Saccharine", "Jadice", "Neoteric", "Lyuba", "Neyvee", "Longcicle", "Ketu",
+      "Snowball", "Jamjam", "Yanghis", "Yeti", "Chorister", "Angler", "Weaver", "Liveloch", "Everfrost",
+      "Igluit", "Sugarmitten", "Toboggan", "Snowdrop", "Cubicle", "Dancey",
+    ],
+  },
+  {
+    name: "Voyage",
+    dragons: [
+      "Icy Torrent", "Mountain Sun", "Hidden Bolt", "Blazing Gale", "Iron Blossom", "Flicker", "Ribbon",
+      "Verglace", "Tinsel", "Flurry", "Thundersnow", "Lace", "Snowbrush", "Kringle", "Krampus", "Dazzling",
+      "Harmony", "Yule", "Spellmason", "Venture", "Reminiscence", "Twinkle", "Glitz", "Zumi", "Zero", "Aisa",
+      "Elkar", "Greenge", "Nature", "Kotun",
+    ],
+  },
+  { name: "Runic", dragons: ["Icebound", "Woolen", "Starshine"] },
 ];
 
-/** "My list" for someone who hasn't customized it yet: the original 23 targets, in their original order. */
-export const DEFAULT_FAVORITES: readonly string[] = EVENT_DRAGONS.slice(0, 23);
+/** The "All event dragons" list: every market section, in order. */
+export const EVENT_DRAGONS: readonly string[] = EVENT_SECTIONS.flatMap((s) => s.dragons);
+
+/**
+ * "My list" for someone who hasn't customized it yet: the three Limited dragons and the eight
+ * headline Branching dragons (the first 11 in market order).
+ */
+export const DEFAULT_FAVORITES: readonly string[] = EVENT_DRAGONS.slice(0, 11);

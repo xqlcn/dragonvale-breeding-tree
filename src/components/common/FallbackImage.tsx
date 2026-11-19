@@ -1,8 +1,19 @@
 import { useState, type ImgHTMLAttributes } from "react";
 import { EGG_PLACEHOLDER_URL } from "../../lib/assets";
 
-/** <img> that swaps to the egg placeholder (once) if the remote image fails to load. */
-export function FallbackImage({ src, ...rest }: ImgHTMLAttributes<HTMLImageElement> & { src: string }) {
-  const [failed, setFailed] = useState(false);
-  return <img loading="lazy" {...rest} src={failed ? EGG_PLACEHOLDER_URL : src} onError={() => setFailed(true)} />;
+type Props = ImgHTMLAttributes<HTMLImageElement> & {
+  src: string;
+  /** Tried in order if `src` fails to load, before the egg placeholder. */
+  fallbacks?: readonly string[];
+};
+
+/**
+ * <img> that steps through `fallbacks` and finally the egg placeholder when an image fails to load.
+ * Give it a `key` that changes with `src` so a new source starts from the top again.
+ */
+export function FallbackImage({ src, fallbacks = [], ...rest }: Props) {
+  const chain = [src, ...fallbacks, EGG_PLACEHOLDER_URL];
+  const [step, setStep] = useState(0);
+  const current = chain[Math.min(step, chain.length - 1)]!;
+  return <img loading="lazy" {...rest} src={current} onError={() => setStep((s) => Math.min(s + 1, chain.length - 1))} />;
 }

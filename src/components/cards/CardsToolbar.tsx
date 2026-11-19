@@ -10,6 +10,8 @@ interface Props {
   onExpandAll: () => void;
   onCollapseAll: () => void;
   onClearObtained: () => void;
+  adultSprites: boolean;
+  onToggleAdultSprites: () => void;
 }
 
 /** Sticky search / sort / filter bar above the card grid. */
@@ -18,7 +20,7 @@ export const CardsToolbar = (p: Props) => (
     <input
       id="q"
       type="search"
-      placeholder="Search dragons (matches anything in a tree, e.g. Scourge)…"
+      placeholder="Search dragons (matches anything in a tree, e.g. Zero)…"
       value={p.query}
       onChange={(e) => p.onQueryChange(e.target.value)}
     />
@@ -36,5 +38,11 @@ export const CardsToolbar = (p: Props) => (
     <button id="expand" onClick={p.onExpandAll}>Expand all</button>
     <button id="collapse" onClick={p.onCollapseAll}>Collapse all</button>
     <button id="clearown" onClick={p.onClearObtained}>Clear obtained</button>
+    <button
+      id="adults" type="button" aria-pressed={p.adultSprites} onClick={p.onToggleAdultSprites}
+      title="Switch the pictures on this tab between baby and adult dragons"
+    >
+      {p.adultSprites ? "🥚 Show babies" : "🐉 Show adults"}
+    </button>
   </div>
 );

@@ -16,8 +16,15 @@ export type ElementName = (typeof ELEMENTS)[number];
  */
 export type RecipeItem = string;
 
+/** DragonVale rarity tier. Rare and epic dragons get a coloured frame around their sprite. */
+export type Rarity = "hybrid" | "rare" | "epic";
+
 export interface Dragon {
-  /** Price in Candy in the event market. Omitted = not sold in the market. */
+  /** Rarity tier (from DV Box). Every catalog dragon has one; tests/data.test.ts checks it. */
+  rarity?: Rarity;
+  /** Breeding time in a regular breeding cave, in seconds (from DV Box). The upgraded cave takes 80% of it. */
+  breedingTime?: number;
+  /** Price in the event currency in the event market. Omitted = not sold in the market. */
   price?: number;
   /** Breeding recipe (parents / element requirements). */
   recipe?: readonly RecipeItem[];

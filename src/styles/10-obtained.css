@@ -1,5 +1,5 @@
 /* "Obtained" toggle buttons and owned-state highlighting outside the graph. */
-button.own{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #57497a;background:transparent;color:transparent;font:800 13px/1 system-ui,sans-serif;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+button.own{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #3d5878;background:transparent;color:transparent;font:800 13px/1 system-ui,sans-serif;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
 button.own:hover{border-color:var(--good);color:var(--good)}
 button.own[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#0d2416}
 button.own.big{width:auto;height:auto;border-radius:99px;padding:5px 12px;gap:6px;color:var(--muted);font-size:12px;margin-top:8px}

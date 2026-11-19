@@ -8,7 +8,7 @@
 .seg button[aria-pressed="true"]{background:var(--panel2);color:var(--text);box-shadow:inset 0 -2px 0 var(--accent)}
 .seg .count{display:inline-block;min-width:22px;margin-left:4px;padding:0 6px;border-radius:99px;background:rgba(0,0,0,.3);color:var(--muted);font-size:12px;text-align:center}
 .linkbtn{background:none;border:0;padding:0;color:var(--accent2);font:inherit;text-decoration:underline;cursor:pointer}
-button.fav{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #57497a;background:transparent;color:#7d6fa0;font:800 13px/1 system-ui,sans-serif;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+button.fav{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid #3d5878;background:transparent;color:#6f8bb0;font:800 13px/1 system-ui,sans-serif;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
 button.fav:hover{border-color:var(--warn);color:var(--warn)}
 button.fav[aria-pressed="true"]{border-color:var(--warn);color:var(--warn)}
 button.fav.big{width:auto;height:auto;border-radius:99px;padding:5px 12px;gap:6px;color:var(--muted);font-size:12px;margin:8px 0 0 6px}

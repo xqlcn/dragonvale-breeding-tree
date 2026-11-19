@@ -2,9 +2,10 @@ import { Fragment } from "react";
 import { DRAGONS } from "../../data/dragons";
 import { requirementsOf } from "../../lib/breeding";
 import { ingredientText, labelOf, parseIngredient } from "../../lib/ingredients";
+import { breedingTimeTooltip } from "../../lib/breedingTime";
 import { parentPurchaseCost } from "../../lib/pricing";
 import { useObtained } from "../../state/ObtainedContext";
-import { CandyAmount } from "../common/CandyAmount";
+import { CurrencyAmount } from "../common/CurrencyAmount";
 import { DragonSprite } from "../common/DragonSprite";
 import { DragonTags } from "../common/DragonTags";
 import { FavoriteToggle } from "../common/FavoriteToggle";
@@ -23,13 +24,13 @@ export function DragonCard({ name, hidden }: { name: string; hidden: boolean }) 
       <div className="card-head">
         <DragonSprite name={name} />
         <div>
-          <h2>{labelOf(name)}</h2>
+          <h2 title={breedingTimeTooltip(name) || undefined}>{labelOf(name)}</h2>
           <Price name={name} />
           <div className="formula"><Formula name={name} /></div>
           <div className="tags">
             <DragonTags name={name} />
             {parentCost !== null && (
-              <span className="tag subtotal">Buying the specific parents: <CandyAmount amount={parentCost} /></span>
+              <span className="tag subtotal">Buying the specific parents: <CurrencyAmount amount={parentCost} /></span>
             )}
           </div>
           <ObtainedToggle name={name} big />

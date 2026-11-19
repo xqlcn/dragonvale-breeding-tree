@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { OwnedFilter, SortMode } from "../../lib/targetList";
 import { useObtained } from "../../state/ObtainedContext";
+import { loadAdultSprites, saveAdultSprites, SpriteStageContext } from "../../state/spriteStage";
 import { CardGrid } from "./CardGrid";
 import { CardsToolbar } from "./CardsToolbar";
 import { PriceTable } from "./PriceTable";
@@ -13,9 +14,14 @@ export function CardsView() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("list");
   const [ownedFilter, setOwnedFilter] = useState<OwnedFilter>("all");
+  const [adultSprites, setAdultSprites] = useState(loadAdultSprites);
   const [expansion, setExpansion] = useState<TreeExpansionCommand>({ seq: 0, expand: true });
 
   const setAllExpanded = (expand: boolean) => setExpansion((c) => ({ seq: c.seq + 1, expand }));
+  const toggleAdultSprites = () => {
+    saveAdultSprites(!adultSprites);
+    setAdultSprites(!adultSprites);
+  };
   const clearObtained = () => {
     if (owned.size && confirm("Clear all obtained marks?")) clear();
   };
@@ -33,13 +39,17 @@ export function CardsView() {
         onExpandAll={() => setAllExpanded(true)}
         onCollapseAll={() => setAllExpanded(false)}
         onClearObtained={clearObtained}
+        adultSprites={adultSprites}
+        onToggleAdultSprites={toggleAdultSprites}
       />
+      <SpriteStageContext.Provider value={adultSprites}>
       <TreeExpansionContext.Provider value={expansion}>
         {/* Keyed by sort: changing the sort rebuilds the cards with default expansion, as the original did. */}
         <CardGrid key={sort} sort={sort} query={query} ownedFilter={ownedFilter} />
       </TreeExpansionContext.Provider>
       <SharedIngredients />
       <PriceTable />
+      </SpriteStageContext.Provider>
     </>
   );
 }

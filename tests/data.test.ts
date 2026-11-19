@@ -12,7 +12,7 @@ describe("dragon data integrity", () => {
 
   it("event dragons are unique and the default list is a subset of them", () => {
     expect(new Set(EVENT_DRAGONS).size).toBe(EVENT_DRAGONS.length);
-    expect(DEFAULT_FAVORITES).toHaveLength(23);
+    expect(DEFAULT_FAVORITES).toHaveLength(11);
     for (const f of DEFAULT_FAVORITES) expect(EVENT_DRAGONS).toContain(f);
   });
 
@@ -35,5 +35,9 @@ describe("dragon data integrity", () => {
   it("every catalog dragon is a target or in some target's tree", () => {
     const reachable = new Set(allTreeDragons(EVENT_DRAGONS));
     for (const name of Object.keys(DRAGONS)) expect(reachable.has(name), `${name} is unused`).toBe(true);
+  });
+
+  it("every catalog dragon has a rarity", () => {
+    for (const [name, d] of Object.entries(DRAGONS)) expect(["hybrid", "rare", "epic"], `${name} rarity`).toContain(d.rarity);
   });
 });

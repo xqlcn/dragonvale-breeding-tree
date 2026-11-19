@@ -1,8 +1,9 @@
 import { memo, useState, type MouseEvent } from "react";
-import { CANDY_ICON_URL } from "../../config";
+import { CURRENCY_ICON_URL } from "../../config";
 import { DRAGONS } from "../../data/dragons";
-import { dragonSpriteUrl, EGG_PLACEHOLDER_URL, elementFlagUrl } from "../../lib/assets";
-import { formatCandy } from "../../lib/format";
+import { dragonSpriteUrl, EGG_PLACEHOLDER_URL, elementFlagUrl, rarityFrameClass } from "../../lib/assets";
+import { breedingTimeTooltip } from "../../lib/breedingTime";
+import { formatAmount } from "../../lib/format";
 import { howToObtainText, labelOf, parseIngredient } from "../../lib/ingredients";
 import { NODE_HEIGHT, NODE_WIDTH } from "./layout";
 
@@ -11,7 +12,7 @@ interface Props {
   x: number;
   y: number;
   owned: boolean;
-  /** On the active list (orange border). */
+  /** On the active list (accent border). */
   target: boolean;
   /** Extra classes from the current focus highlight (" dim", " sel", " down"). */
   highlight: string;
@@ -25,7 +26,9 @@ const FLAG_STEP = 22;
 function tooltip(name: string): string {
   const d = DRAGONS[name] ?? {};
   const how = howToObtainText(name);
-  return labelOf(name) + (how ? " = " + how : "") + (d.evolveRequirement ? " (needs " + d.evolveRequirement + ")" : "") + (d.note ? "\n" + d.note : "");
+  const times = breedingTimeTooltip(name);
+  return labelOf(name) + (how ? " = " + how : "") + (d.evolveRequirement ? " (needs " + d.evolveRequirement + ")" : "") + (d.note ? "\n" + d.note : "") +
+    (times ? "\n" + times : "");
 }
 
 /** One dragon box in the breeding graph. */
@@ -33,6 +36,7 @@ export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, hi
   const d = DRAGONS[name] ?? {};
   const [spriteFailed, setSpriteFailed] = useState(false);
   const kind = target ? "target" : d.price ? "market" : "nomarket";
+  const frame = rarityFrameClass(name);
   const nameFlags = (d.breedAtNight ? "🌙" : "") + (d.riftOnly ? "🌀" : "");
   const extraRequirements = (d.recipe ?? []).map(parseIngredient).filter((i) => i.kind !== "dragon");
 
@@ -45,6 +49,7 @@ export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, hi
     >
       <title>{tooltip(name)}</title>
       <rect className="box" width={NODE_WIDTH} height={NODE_HEIGHT} rx={10} />
+      {frame && <rect className={`rframe ${frame}`} x={4} y={7} width={64} height={64} rx={9} />}
       <image
         href={spriteFailed ? EGG_PLACEHOLDER_URL : dragonSpriteUrl(name)}
         x={6} y={9} width={60} height={60}
@@ -54,8 +59,8 @@ export const GraphNode = memo(function GraphNode({ name, x, y, owned, target, hi
       <text x={72} y={24}>{labelOf(name) + (nameFlags ? " " + nameFlags : "")}</text>
       {d.price ? (
         <>
-          <image href={CANDY_ICON_URL} x={72} y={32} width={13} height={15} />
-          <text className="pr" x={89} y={45}>{formatCandy(d.price)}</text>
+          <image href={CURRENCY_ICON_URL} x={72} y={32} width={13} height={15} />
+          <text className="pr" x={89} y={45}>{formatAmount(d.price)}</text>
         </>
       ) : (
         <text className="pr" x={72} y={45}>not in market</text>

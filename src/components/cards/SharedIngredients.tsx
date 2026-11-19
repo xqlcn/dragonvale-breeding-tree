@@ -1,3 +1,4 @@
+import { breedingTimeTooltip } from "../../lib/breedingTime";
 import { sharedIngredients } from "../../lib/breeding";
 import { useMemo } from "react";
 import { useObtained } from "../../state/ObtainedContext";
@@ -23,7 +24,7 @@ export function SharedIngredients() {
           <div key={name} className={isOwned(name) ? "node owned" : "node"} data-name={name} title={`Used in: ${usedInTargets.join(", ")}`}>
             <ObtainedToggle name={name} />
             <DragonSprite name={name} />
-            <div className="meta">
+            <div className="meta" title={breedingTimeTooltip(name) || undefined}>
               <span className="nm">{name}</span>
               <span className="how">in {usedInTargets.length} trees: {usedInTargets.join(", ")}</span>
             </div>

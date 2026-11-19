@@ -1,20 +1,25 @@
-# Candy Bash XIII — Breeding Trees
+# Branches of Valedrasil — Breeding Trees
 
-An interactive planner for the DragonVale **Candy Bash XIII: FEAR** event. It covers all 106 dragons in the event
+An interactive planner for the DragonVale **Branches of Valedrasil** event. It covers all 111 dragons in the event
 market, and lets you keep a **⭐ My list** of the dragons you're going for. A switch at the top picks **My list** or
 **All event dragons**, and everything below follows it:
 
-- **Trees & prices**: a card per dragon with its full, collapsible breeding tree, Candy market prices, special
+- **Trees & prices**: a card per dragon with its full, collapsible breeding tree, Iceberries market prices, special
   conditions (night, Rift, evolution, cloning), search / sort / "obtained" filters, a list of shared ingredients and a
-  price summary table.
+  price summary table. Sprites are framed blue for rare and violet for epic dragons, and hovering a dragon shows its
+  breeding time in a regular and an upgraded breeding cave (80% of regular). "🐉 Show adults" in the toolbar swaps
+  this tab's baby sprites for adult art from the DragonVale Fandom wiki (the graph keeps babies).
 - **Breeding graph**: every dragon involved, auto-laid-out with ELK. You can pan, zoom (wheel or pinch) and
-  click a box to highlight what it needs (orange) and what uses it (blue).
+  click a box to highlight what it needs (cyan) and what uses it (pink).
 - **Progress tracking**: tick the ✓ on any dragon to mark it obtained. Progress is stored in your browser and shared
   across both views and both lists.
-- **My list**: press ☆ on a card (or in the price table) to add a dragon, ★ to remove it. It starts as the original
-  23-dragon list; "Reset my list" restores that. The list and the selected view are saved in your browser.
+- **My list**: press ☆ on a card (or in the price table) to add a dragon, ★ to remove it, or open **☑ Edit my list**
+  for a checklist of every event dragon by market section, with per-section boxes, a filter and select / clear all.
+  It starts as the 11 headline dragons (the Limited and top Branching ones); "Reset my list" restores that. The list
+  and the selected view are saved in your browser.
 
-The original single-file version is kept for reference in [`legacy/`](legacy/candy-bash-xiii-breeding-tree.html).
+The original single-file version (built for the earlier Candy Bash XIII event) is kept for reference in
+[`legacy/`](legacy/candy-bash-xiii-breeding-tree.html).
 
 ## Tech stack
 
@@ -40,12 +45,13 @@ global CSS is kept verbatim so the look is pixel-identical.
 ├── src/
 │   ├── main.tsx               Mounts <App/> and the global stylesheet
 │   ├── App.tsx                Page shell: header, stats, legend, tabs, footer
-│   ├── config.ts              External asset URLs, localStorage keys
+│   ├── config.ts              Event name / currency, external asset URLs, localStorage keys
 │   ├── assets/egg.svg         Placeholder shown when a sprite fails to load
 │   ├── data/                  ← edit these to change dragons / prices
 │   │   ├── types.ts           Dragon + recipe-notation types, element list
-│   │   ├── dragons.ts         Every dragon: price, recipe / evolution, flags, notes
-│   │   └── targets.ts         All event-market dragons + the default "My list"
+│   │   ├── dragons.ts         Every dragon: price, rarity, breeding time, recipe / evolution, flags, notes
+│   │   ├── adultSprites.ts    Adult-art paths on the Fandom wiki (generated)
+│   │   └── targets.ts         Event-market dragons by section + the default "My list"
 │   ├── lib/                   Pure, framework-free logic (unit tested)
 │   │   ├── ingredients.ts     Parse "el:fire" / "epic:X" / "special:4"; text helpers
 │   │   ├── breeding.ts        Tree walking, upstream/downstream, shared ingredients
@@ -115,11 +121,21 @@ It does load images from third-party hosts at runtime, so an internet connection
 | Asset | Host | Offline behaviour |
 | --- | --- | --- |
 | Dragon sprites, element flags | `dvboxcdn.com` | Falls back to a local "?" egg placeholder |
-| Candy icon | `static.wikia.nocookie.net` (Fandom) | Shows as a missing image |
+| Adult dragon art | `static.wikia.nocookie.net` (Fandom) | Falls back to the baby sprite, then the egg |
+| Iceberries icon | `static.wikia.nocookie.net` (Fandom) | Shows as a missing image |
 
 The graph layout engine is bundled locally, so the app itself (data, trees, graph, progress tracking) works offline
 once installed. The URLs live in `src/config.ts`. `index.html` sets `<meta name="referrer" content="no-referrer">`
 because Fandom rejects hot-linked images that carry a third-party `Referer`.
+
+## Switching to a new event
+
+1. Replace `src/data/dragons.ts` (every market dragon plus every dragon in their trees) and `src/data/targets.ts`
+   (market list + default "My list").
+2. In `src/config.ts`, update `EVENT_NAME`, `CURRENCY_NAME`, `CURRENCY_ICON_URL`, and give the three storage keys a
+   new prefix so the new event starts with a fresh "obtained" set and the new default list.
+3. Update the heading in `src/components/layout/Header.tsx`, the `<title>` in `index.html`, and the expected numbers in
+   `tests/`. `npm test` flags unknown dragons, unknown elements and catalog dragons no tree uses.
 
 ## Extending the app
 

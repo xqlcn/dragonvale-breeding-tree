@@ -3,6 +3,7 @@ import { DRAGONS } from "../../data/dragons";
 import type { RecipeItem } from "../../data/types";
 import { requirementsOf } from "../../lib/breeding";
 import { howToObtainText, labelOf, parseIngredient, type Ingredient } from "../../lib/ingredients";
+import { breedingTimeTooltip } from "../../lib/breedingTime";
 import { useObtained } from "../../state/ObtainedContext";
 import { DragonSprite } from "../common/DragonSprite";
 import { ElementFlag } from "../common/ElementFlag";
@@ -72,7 +73,7 @@ function DragonNode({ name, expandable }: { name: string; expandable: boolean })
       {expandable ? <span className="caret">▶</span> : <span className="leafpad"></span>}
       <ObtainedToggle name={name} />
       <DragonSprite name={name} />
-      <div className="meta">
+      <div className="meta" title={breedingTimeTooltip(name) || undefined}>
         <span className="nm">{labelOf(name)}</span>
         {how ? <span className="how">{how}</span> : d.note ? <span className="how">{d.note}</span> : null}
         {d.evolvesFrom && <span className="how">needs {d.evolveRequirement}</span>}

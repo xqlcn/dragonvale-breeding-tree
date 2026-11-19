@@ -1,9 +1,10 @@
 import { DRAGONS } from "../../data/dragons";
 import { howToObtainText, labelOf } from "../../lib/ingredients";
+import { breedingTimeTooltip } from "../../lib/breedingTime";
 import { priceOf, remainingTargetPrice, totalTargetPrice } from "../../lib/pricing";
 import { useObtained } from "../../state/ObtainedContext";
 import { useTargetList } from "../../state/TargetListContext";
-import { CandyAmount } from "../common/CandyAmount";
+import { CurrencyAmount } from "../common/CurrencyAmount";
 import { DragonSprite } from "../common/DragonSprite";
 import { FavoriteToggle } from "../common/FavoriteToggle";
 import { ObtainedToggle } from "../common/ObtainedToggle";
@@ -33,17 +34,17 @@ export function PriceTable() {
             {rows.map((n) => (
               <tr key={n} data-name={n} className={owned.has(n) ? "owned" : ""}>
                 <td className="ownc"><ObtainedToggle name={n} /><FavoriteToggle name={n} /></td>
-                <td><DragonSprite name={n} /><b>{labelOf(n)}</b></td>
+                <td title={breedingTimeTooltip(n) || undefined}><DragonSprite name={n} /><b>{labelOf(n)}</b></td>
                 <td>{howCell(n)}</td>
-                <td className="num"><CandyAmount amount={priceOf(n)} /></td>
+                <td className="num"><CurrencyAmount amount={priceOf(n)} /></td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr><th colSpan={3}>Total for all {targets.length}</th><th style={{ textAlign: "right" }}><CandyAmount amount={totalTargetPrice(targets)} /></th></tr>
+            <tr><th colSpan={3}>Total for all {targets.length}</th><th style={{ textAlign: "right" }}><CurrencyAmount amount={totalTargetPrice(targets)} /></th></tr>
             <tr>
               <th colSpan={3} style={{ color: "var(--good)" }}>Still to buy ({notObtained} not obtained)</th>
-              <th style={{ textAlign: "right", color: "var(--good)" }}><CandyAmount amount={remainingTargetPrice(targets, owned)} /></th>
+              <th style={{ textAlign: "right", color: "var(--good)" }}><CurrencyAmount amount={remainingTargetPrice(targets, owned)} /></th>
             </tr>
           </tfoot>
         </table>

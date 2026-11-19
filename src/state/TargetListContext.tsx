@@ -11,7 +11,9 @@ interface TargetListState {
   isFavorite: (name: string) => boolean;
   /** Adds the dragon to the end of "My list", or removes it. */
   toggleFavorite: (name: string) => void;
-  /** Restores the original 23-dragon list. */
+  /** Adds every given dragon (to the end, in the given order) or removes them all at once. */
+  setFavoritesMany: (names: readonly string[], include: boolean) => void;
+  /** Restores the default list (`DEFAULT_FAVORITES`). */
   resetFavorites: () => void;
   /** The active targets: "My list" or every event dragon. Drives cards, prices, stats and the graph. */
   targets: readonly string[];
@@ -37,6 +39,17 @@ export function TargetListProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setFavoritesMany = useCallback((names: readonly string[], include: boolean) => {
+    setFavorites((prev) => {
+      const next = include
+        ? [...prev, ...names.filter((n, i) => !prev.includes(n) && names.indexOf(n) === i)]
+        : prev.filter((n) => !names.includes(n));
+      if (next.length === prev.length && next.every((n, i) => n === prev[i])) return prev;
+      saveFavorites(next);
+      return next;
+    });
+  }, []);
+
   const resetFavorites = useCallback(() => {
     const next = DEFAULT_FAVORITES.slice();
     saveFavorites(next);
@@ -46,11 +59,11 @@ export function TargetListProvider({ children }: { children: ReactNode }) {
   const value = useMemo<TargetListState>(() => {
     const favSet = new Set(favorites);
     return {
-      scope, setScope, favorites, toggleFavorite, resetFavorites,
+      scope, setScope, favorites, toggleFavorite, setFavoritesMany, resetFavorites,
       isFavorite: (n) => favSet.has(n),
       targets: scope === "all" ? EVENT_DRAGONS : favorites,
     };
-  }, [scope, setScope, favorites, toggleFavorite, resetFavorites]);
+  }, [scope, setScope, favorites, toggleFavorite, setFavoritesMany, resetFavorites]);
   return <TargetListContext.Provider value={value}>{children}</TargetListContext.Provider>;
 }
 
